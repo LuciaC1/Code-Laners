@@ -8,8 +8,8 @@ type PerformedExerciseDTO struct {
 }
 
 type WorkoutDTO struct {
-	RoutineID   *string                `json:"routine_id,omitempty"`
+	RoutineID   string                 `json:"routine_id,omitempty"`
 	Performed   []PerformedExerciseDTO `json:"performed" binding:"required"`
-	DurationMin *int                   `json:"duration_min,omitempty"`
-	Notes       *string                `json:"notes,omitempty"`
+	DurationMin int                    `json:"duration_min,omitempty"`
+	Notes       string                 `json:"notes,omitempty"`
 }
