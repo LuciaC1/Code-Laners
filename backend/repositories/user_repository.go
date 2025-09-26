@@ -56,3 +56,52 @@ func (repository UserRepository) GetUser(name string) ([]models.User, error) {
 
 	return users, nil
 }
+func (repository UserRepository) ObtenerAvionPorID(id string) (models.User, error) {
+	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	filter := bson.M{"_id": objectID}
+	var user models.User
+
+	err = collection.FindOne(context.TODO(), filter).Decode(&user)
+	return user, err
+}
+
+func (repository UserRepository) InsertarUser(user models.User) (*mongo.InsertOneResult, error) {
+	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
+	result, err := collection.InsertOne(context.TODO(), user)
+	return result, err
+}
+
+func (repository UserRepository) ModificarUser(user models.User) (*mongo.UpdateResult, error) {
+	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
+
+	filter := bson.M{"_id": user.ID}
+	update := bson.M{"$set": bson.M{
+		"name":             user.Name,
+		"email":            user.Email,
+		"password_hash":    user.PasswordHash,
+		"role":             user.Role,
+		"date_of_birth":    user.DateOfBirth,
+		"weight,omitempty": user.Weight,
+		"height,omitempty": user.Height,
+		"level,omitempty":  user.Level,
+		"goals,omitempty":  user.Goals,
+		"created_at":       user.CreatedAt,
+		"updated_at":       user.UpdatedAt,
+	}}
+
+	result, err := collection.UpdateOne(context.TODO(), filter, update)
+	return result, err
+}
+
+func (repository UserRepository) EliminarUser(id primitive.ObjectID) (*mongo.DeleteResult, error) {
+	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
+
+	filter := bson.M{"_id": id}
+	result, err := collection.DeleteOne(context.TODO(), filter)
+	return result, err
+}
