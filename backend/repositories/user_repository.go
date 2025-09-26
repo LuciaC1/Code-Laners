@@ -56,7 +56,7 @@ func (repository UserRepository) GetUser(name string) ([]models.User, error) {
 
 	return users, nil
 }
-func (repository UserRepository) ObtenerAvionPorID(id string) (models.User, error) {
+func (repository UserRepository) GetUserByID(id string) (models.User, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -70,13 +70,13 @@ func (repository UserRepository) ObtenerAvionPorID(id string) (models.User, erro
 	return user, err
 }
 
-func (repository UserRepository) InsertarUser(user models.User) (*mongo.InsertOneResult, error) {
+func (repository UserRepository) CreateUser(user models.User) (*mongo.InsertOneResult, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
 	result, err := collection.InsertOne(context.TODO(), user)
 	return result, err
 }
 
-func (repository UserRepository) ModificarUser(user models.User) (*mongo.UpdateResult, error) {
+func (repository UserRepository) UpdaterUser(user models.User) (*mongo.UpdateResult, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
 
 	filter := bson.M{"_id": user.ID}
@@ -98,7 +98,7 @@ func (repository UserRepository) ModificarUser(user models.User) (*mongo.UpdateR
 	return result, err
 }
 
-func (repository UserRepository) EliminarUser(id primitive.ObjectID) (*mongo.DeleteResult, error) {
+func (repository UserRepository) DeleteUser(id primitive.ObjectID) (*mongo.DeleteResult, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
 
 	filter := bson.M{"_id": id}
