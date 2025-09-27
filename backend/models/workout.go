@@ -19,6 +19,7 @@ type Workout struct {
 	RoutineID          *primitive.ObjectID   `bson:"routine_id,omitempty" json:"routine_id,omitempty"`
 	PerformedExercises []ExercisePerformance `bson:"performed_exercises" json:"performed_exercises"`
 	CompletedAt        time.Time             `bson:"completed_at" json:"completed_at"`
+	UpdatedAt          time.Time             `bson:"updated_at" json:"updated_at"`
 	DurationMinutes    int                   `bson:"duration_minutes,omitempty" json:"duration_minutes,omitempty"`
 	Notes              string                `bson:"notes,omitempty" json:"notes,omitempty"`
 }

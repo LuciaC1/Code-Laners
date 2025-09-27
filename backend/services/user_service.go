@@ -4,65 +4,75 @@ import (
 	"errors"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/bcrypt"
-
 	"backend/models"
 	"backend/repositories"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
-	Repo *repositories.UserRepository
+	repo *repositories.UserRepository
 }
 
 func NewUserService(repo *repositories.UserRepository) *UserService {
-	return &UserService{Repo: repo}
+	return &UserService{repo: repo}
 }
 
 func (s *UserService) GetUsers(name string) ([]models.User, error) {
-	return s.Repo.GetUser(name)
+	return s.repo.GetUser(name)
 }
 
 func (s *UserService) GetUserByID(id string) (models.User, error) {
-	return s.Repo.GetUserByID(id)
+	if id == "" {
+		return models.User{}, errors.New("id required")
+	}
+	return s.repo.GetUserByID(id)
 }
 
-func (s *UserService) RegisterUser(u models.User, plainPassword string) (*primitive.ObjectID, error) {
+func (s *UserService) CreateUser(u models.User, plainPassword string) (*mongo.InsertOneResult, error) {
 	if u.Name == "" || u.Email == "" {
 		return nil, errors.New("name and email are required")
 	}
 	if len(plainPassword) < 6 {
 		return nil, errors.New("password must be at least 6 characters")
 	}
-
 	hash, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
 	u.PasswordHash = string(hash)
-
+	if u.Role == "" {
+		u.Role = "user"
+	}
 	now := time.Now()
 	u.CreatedAt = now
 	u.UpdatedAt = now
+	return s.repo.CreateUser(u)
+}
 
-	res, err := s.Repo.CreateUser(u)
+func normalizeLevel(l string) string {
+	switch l {
+	case "principiante":
+		return "beginner"
+	case "intermedio":
+		return "intermediate"
+	case "avanzado":
+		return "advanced"
+	default:
+		return l
+	}
+}
+
+func (s *UserService) UpdateProfile(id string, payload models.User) (*mongo.UpdateResult, error) {
+	if id == "" {
+		return nil, errors.New("id required")
+	}
+	existing, err := s.repo.GetUserByID(id)
 	if err != nil {
 		return nil, err
 	}
-
-	oid, ok := res.InsertedID.(primitive.ObjectID)
-	if !ok {
-		return nil, errors.New("could not parse inserted id")
-	}
-	return &oid, nil
-}
-
-func (s *UserService) UpdateProfile(idHex string, payload models.User) error {
-	existing, err := s.Repo.GetUserByID(idHex)
-	if err != nil {
-		return err
-	}
-
 	if payload.Name != "" {
 		existing.Name = payload.Name
 	}
@@ -79,47 +89,45 @@ func (s *UserService) UpdateProfile(idHex string, payload models.User) error {
 		existing.Height = payload.Height
 	}
 	if payload.Level != "" {
-		existing.Level = payload.Level
+		existing.Level = normalizeLevel(payload.Level)
 	}
-	if payload.Goals != nil && len(payload.Goals) > 0 {
+	if len(payload.Goals) > 0 {
 		existing.Goals = payload.Goals
 	}
 	existing.UpdatedAt = time.Now()
-
-	_, err = s.Repo.UpdaterUser(existing)
-	return err
+	return s.repo.UpdaterUser(existing)
 }
 
-func (s *UserService) ChangePassword(idHex string, oldPassword, newPassword string) error {
+func (s *UserService) ChangePassword(id, oldPassword, newPassword string) (*mongo.UpdateResult, error) {
+	if id == "" {
+		return nil, errors.New("id required")
+	}
 	if len(newPassword) < 6 {
-		return errors.New("new password must be at least 6 characters")
+		return nil, errors.New("new password must be at least 6 characters")
 	}
-
-	user, err := s.Repo.GetUserByID(idHex)
+	user, err := s.repo.GetUserByID(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(oldPassword)); err != nil {
-		return errors.New("old password is incorrect")
+		return nil, errors.New("old password is incorrect")
 	}
-
 	newHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	user.PasswordHash = string(newHash)
 	user.UpdatedAt = time.Now()
-
-	_, err = s.Repo.UpdaterUser(user)
-	return err
+	return s.repo.UpdaterUser(user)
 }
 
-func (s *UserService) DeleteUserByHex(idHex string) error {
-	oid, err := primitive.ObjectIDFromHex(idHex)
-	if err != nil {
-		return err
+func (s *UserService) DeleteUser(id string) (*mongo.DeleteResult, error) {
+	if id == "" {
+		return nil, errors.New("id required")
 	}
-	_, err = s.Repo.DeleteUser(oid)
-	return err
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.DeleteUser(oid)
 }
