@@ -77,7 +77,6 @@ func (s *WorkoutService) CreateWorkout(w models.Workout, userHex string) (*mongo
 		w.CompletedAt = time.Now()
 	}
 	w.UserID = uid
-	// optional: ensure PerformedExercises non-nil
 	if w.PerformedExercises == nil {
 		w.PerformedExercises = []models.ExercisePerformance{}
 	}
@@ -223,7 +222,7 @@ func (s *WorkoutService) GetProgressOverTime(userHex, metric string, from, to ti
 				total += float64(pe.Sets) * float64(pe.Reps) * pe.Weight
 			}
 			byDay[dayKey] += total
-		default: // "count"
+		default: 
 			byDay[dayKey] += 1
 		}
 	}
