@@ -18,7 +18,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Verificar que el header tenga el formato "Bearer <token>"
 		tokenParts := strings.Split(authHeader, " ")
 		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Formato de token inválido"})
@@ -34,7 +33,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Inyectar el user_id en el contexto
 		c.Set("user_id", claims.UserID)
 		c.Set("user_email", claims.Email)
 		c.Next()
