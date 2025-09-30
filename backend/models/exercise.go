@@ -8,6 +8,7 @@ import (
 
 type Exercise struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	UserID      string             `bson:"user_id" json:"user_id"`
 	Name        string             `bson:"name" json:"name"`
 	Description string             `bson:"description,omitempty" json:"description,omitempty"`
 	Category    string             `bson:"category" json:"category"`

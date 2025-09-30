@@ -1,6 +1,7 @@
 package dto
 
 type ExerciseDTO struct {
+	UserID      string   `json:"user_id"`
 	Name        string   `json:"name" binding:"required"`
 	Description string   `json:"description,omitempty"`
 	Category    string   `json:"category" binding:"required"`
@@ -10,7 +11,12 @@ type ExerciseDTO struct {
 	Steps       []string `json:"steps,omitempty"`
 }
 
-type ExerciseQuery struct {
-	Name     string `form:"name"`
-	Category string `form:"category"`
+type ExerciseRequest struct {
+	Name        string `form:"name"`
+	Category    string `form:"category"`
+	MuscleGroup string `form:"muscle_group"`
+}
+
+type ExerciseListResponse struct {
+	Exercises []ExerciseDTO `json:"exercises"`
 }

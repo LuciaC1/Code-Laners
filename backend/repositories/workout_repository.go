@@ -77,12 +77,13 @@ func (repository WorkoutRepository) UpdateWorkout(workout models.Workout) (*mong
 
 	filter := bson.M{"_id": workout.ID}
 	update := bson.M{"$set": bson.M{
-		"user_id":             workout.UserID,
-		"routine_id":          workout.RoutineID,
-		"performed_exercises": workout.PerformedExercises,
-		"completed_at":        workout.CompletedAt,
-		"duration_minutes":    workout.DurationMinutes,
-		"notes":               workout.Notes,
+		"user_id":            workout.UserID,
+		"routine_id":         workout.RoutineID,
+		"completed_at":       workout.CompletedAt,
+		"updated_at":         workout.UpdatedAt,
+		"duration_minutes":   workout.DurationMinutes,
+		"estimated_calories": workout.EstimatedCalories,
+		"notes":              workout.Notes,
 	}}
 
 	result, err := collection.UpdateOne(context.TODO(), filter, update)

@@ -8,7 +8,7 @@ import (
 
 type RoutineEntry struct {
 	ExerciseID primitive.ObjectID `bson:"exercise_id" json:"exercise_id"`
-	Order      int                `bson:"order" json:"order"` // para ordenar ejercicios en la rutina
+	Order      int                `bson:"order" json:"order"` 
 	Sets       int                `bson:"sets" json:"sets"`
 	Reps       int                `bson:"reps" json:"reps"`
 	Weight     float64            `bson:"weight,omitempty" json:"weight,omitempty"`
