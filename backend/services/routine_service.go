@@ -2,236 +2,306 @@ package services
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
+	"backend/dto"
 	"backend/models"
 	"backend/repositories"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type RoutineResponseDTO struct {
+	ID          string                `json:"id"`
+	OwnerID     string                `json:"owner_id"`
+	Name        string                `json:"name"`
+	Description string                `json:"description,omitempty"`
+	Entries     []dto.RoutineEntryDTO `json:"entries"`
+	IsPublic    bool                  `json:"is_public"`
+	CreatedAt   time.Time             `json:"created_at"`
+	UpdatedAt   time.Time             `json:"updated_at"`
+}
+
+type RoutineServiceInterface interface {
+	CreateRoutine(ownerID string, input dto.RoutineDTO) (string, error)
+	GetRoutines(ownerID string, name string) ([]RoutineResponseDTO, error)
+	GetRoutineByID(id string) (RoutineResponseDTO, error)
+	UpdateRoutine(ownerID string, routineID string, input dto.RoutineDTO) error
+	DeleteRoutine(ownerID string, routineID string) error
+	DuplicateRoutine(ownerID string, sourceRoutineID string, newName string) (string, error)
+}
+
 type RoutineService struct {
-	repo repositories.RoutineRepositoryInterface
+	repo         repositories.RoutineRepositoryInterface
+	exerciseRepo repositories.ExerciseRepositoryInterface
 }
 
-func NewRoutineService(repo repositories.RoutineRepositoryInterface) *RoutineService {
-	return &RoutineService{repo: repo}
+func NewRoutineService(repo repositories.RoutineRepositoryInterface, exerciseRepo repositories.ExerciseRepositoryInterface) *RoutineService {
+	return &RoutineService{repo: repo, exerciseRepo: exerciseRepo}
 }
 
-func (s *RoutineService) GetRoutines(ownerHex, name string) ([]models.Routine, error) {
-	if ownerHex == "" {
-		return nil, errors.New("owner id required")
+func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineDTO) (string, error) {
+	if ownerID == "" {
+		return "", errors.New("ownerID requerido")
 	}
-	ownerID, err := primitive.ObjectIDFromHex(ownerHex)
+	own, err := primitive.ObjectIDFromHex(ownerID)
+	if err != nil {
+		return "", fmt.Errorf("ownerID inválido: %w", err)
+	}
+	if err := validateRoutineEntries(input.Entries); err != nil {
+		return "", err
+	}
+	var exIDs []primitive.ObjectID
+	for _, e := range input.Entries {
+		id, _ := primitive.ObjectIDFromHex(e.ExerciseID)
+		exIDs = append(exIDs, id)
+	}
+	if err := s.verifyExercisesExist(exIDs); err != nil {
+		return "", err
+	}
+	routine := models.Routine{
+		ID:          primitive.NewObjectID(),
+		OwnerID:     own,
+		Name:        input.Name,
+		Description: input.Description,
+		IsPublic:    input.IsPublic,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	routine.Entries = make([]models.RoutineEntry, 0, len(input.Entries))
+	for _, e := range input.Entries {
+		exID, _ := primitive.ObjectIDFromHex(e.ExerciseID)
+		routine.Entries = append(routine.Entries, models.RoutineEntry{
+			ExerciseID: exID,
+			Order:      e.Order,
+			Sets:       e.Sets,
+			Reps:       e.Reps,
+			Weight:     e.Weight,
+		})
+	}
+
+	res, err := s.repo.CreateRoutine(routine)
+	if err != nil {
+		return "", err
+	}
+	if oid, ok := res.InsertedID.(primitive.ObjectID); ok {
+		return oid.Hex(), nil
+	}
+	return "", nil
+}
+
+func (s *RoutineService) GetRoutines(ownerID string, name string) ([]RoutineResponseDTO, error) {
+	if ownerID == "" {
+		return nil, errors.New("ownerID requerido")
+	}
+	own, err := primitive.ObjectIDFromHex(ownerID)
 	if err != nil {
 		return nil, err
 	}
-	return s.repo.GetRoutines(ownerID, name)
-}
-
-func (s *RoutineService) GetRoutineByID(id string) (models.Routine, error) {
-	if id == "" {
-		return models.Routine{}, errors.New("id required")
-	}
-	return s.repo.GetRoutineByID(id)
-}
-
-func (s *RoutineService) CreateRoutine(r models.Routine, ownerHex string) (*mongo.InsertOneResult, error) {
-	if ownerHex == "" {
-		return nil, errors.New("owner id required")
-	}
-	if r.Name == "" {
-		return nil, errors.New("routine name is required")
-	}
-	ownerID, err := primitive.ObjectIDFromHex(ownerHex)
+	modelsList, err := s.repo.GetRoutines(own, name)
 	if err != nil {
 		return nil, err
 	}
-	now := time.Now()
-	r.OwnerID = ownerID
-	r.CreatedAt = now
-	r.UpdatedAt = now
-	if r.Entries == nil {
-		r.Entries = []models.RoutineEntry{}
+	out := make([]RoutineResponseDTO, 0, len(modelsList))
+	for _, m := range modelsList {
+		out = append(out, routineModelToResponse(m))
 	}
-	return s.repo.CreateRoutine(r)
+	return out, nil
 }
 
-func (s *RoutineService) UpdateRoutine(idHex string, payload models.Routine, ownerHex string) (*mongo.UpdateResult, error) {
-	if idHex == "" {
-		return nil, errors.New("id required")
-	}
-	if ownerHex == "" {
-		return nil, errors.New("owner id required")
-	}
-	existing, err := s.repo.GetRoutineByID(idHex)
+func (s *RoutineService) GetRoutineByID(id string) (RoutineResponseDTO, error) {
+	m, err := s.repo.GetRoutineByID(id)
 	if err != nil {
-		return nil, err
+		return RoutineResponseDTO{}, err
 	}
-	ownerID, err := primitive.ObjectIDFromHex(ownerHex)
+	return routineModelToResponse(m), nil
+}
+
+func (s *RoutineService) UpdateRoutine(ownerID string, routineID string, input dto.RoutineDTO) error {
+	existing, err := s.repo.GetRoutineByID(routineID)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if existing.OwnerID != ownerID {
-		return nil, errors.New("forbidden: not the owner")
+	own, err := primitive.ObjectIDFromHex(ownerID)
+	if err != nil {
+		return err
 	}
-	if payload.Name != "" {
-		existing.Name = payload.Name
+	if existing.OwnerID != own {
+		return errors.New("no autorizado: no es el owner de la rutina")
 	}
-	if payload.Description != "" {
-		existing.Description = payload.Description
+	if err := validateRoutineEntries(input.Entries); err != nil {
+		return err
 	}
-	if payload.IsPublic {
-		existing.IsPublic = payload.IsPublic
+	var exIDs []primitive.ObjectID
+	for _, e := range input.Entries {
+		id, _ := primitive.ObjectIDFromHex(e.ExerciseID)
+		exIDs = append(exIDs, id)
 	}
-	if len(payload.Entries) > 0 {
-		existing.Entries = payload.Entries
+	if err := s.verifyExercisesExist(exIDs); err != nil {
+		return err
 	}
+	existing.Name = input.Name
+	existing.Description = input.Description
+	existing.IsPublic = input.IsPublic
 	existing.UpdatedAt = time.Now()
-	return s.repo.UpdateRoutine(existing)
+	existing.Entries = make([]models.RoutineEntry, 0, len(input.Entries))
+	for _, e := range input.Entries {
+		exID, _ := primitive.ObjectIDFromHex(e.ExerciseID)
+		existing.Entries = append(existing.Entries, models.RoutineEntry{
+			ExerciseID: exID,
+			Order:      e.Order,
+			Sets:       e.Sets,
+			Reps:       e.Reps,
+			Weight:     e.Weight,
+		})
+	}
+	_, err = s.repo.UpdateRoutine(existing)
+	return err
 }
 
-func (s *RoutineService) DeleteRoutine(idHex, ownerHex string) (*mongo.DeleteResult, error) {
-	if idHex == "" {
-		return nil, errors.New("id required")
-	}
-	if ownerHex == "" {
-		return nil, errors.New("owner id required")
-	}
-	existing, err := s.repo.GetRoutineByID(idHex)
+func (s *RoutineService) DeleteRoutine(ownerID string, routineID string) error {
+	existing, err := s.repo.GetRoutineByID(routineID)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	ownerID, err := primitive.ObjectIDFromHex(ownerHex)
+	own, err := primitive.ObjectIDFromHex(ownerID)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if existing.OwnerID != ownerID {
-		return nil, errors.New("forbidden: not the owner")
+	if existing.OwnerID != own {
+		return errors.New("no autorizado: no es el owner de la rutina")
 	}
-	oid, err := primitive.ObjectIDFromHex(idHex)
-	if err != nil {
-		return nil, err
-	}
-	return s.repo.DeleteRoutine(oid)
+	_, err = s.repo.DeleteRoutine(existing.ID)
+	return err
 }
 
-func (s *RoutineService) DuplicateRoutine(idHex, ownerHex, newName string) (*mongo.InsertOneResult, error) {
-	if idHex == "" {
-		return nil, errors.New("id required")
+func (s *RoutineService) DuplicateRoutine(ownerID string, sourceRoutineID string, newName string) (string, error) {
+	if sourceRoutineID == "" {
+		return "", errors.New("sourceRoutineID requerido")
 	}
-	if ownerHex == "" {
-		return nil, errors.New("owner id required")
-	}
-	orig, err := s.repo.GetRoutineByID(idHex)
+	src, err := s.repo.GetRoutineByID(sourceRoutineID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	ownerID, err := primitive.ObjectIDFromHex(ownerHex)
+	own, err := primitive.ObjectIDFromHex(ownerID)
 	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("ownerID inválido: %w", err)
 	}
-	now := time.Now()
-	copyRoutine := models.Routine{
-		OwnerID:     ownerID,
-		Name:        newNameOrDefault(newName, orig.Name),
-		Description: orig.Description,
-		Entries:     duplicateEntries(orig.Entries),
-		IsPublic:    orig.IsPublic,
-		CreatedAt:   now,
-		UpdatedAt:   now,
+	var exIDs []primitive.ObjectID
+	for _, e := range src.Entries {
+		exIDs = append(exIDs, e.ExerciseID)
 	}
-	return s.repo.CreateRoutine(copyRoutine)
+	if err := s.verifyExercisesExist(exIDs); err != nil {
+		return "", err
+	}
+	copy := models.Routine{
+		ID:          primitive.NewObjectID(),
+		OwnerID:     own,
+		Name:        newName,
+		Description: src.Description,
+		IsPublic:    src.IsPublic,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	copy.Entries = make([]models.RoutineEntry, 0, len(src.Entries))
+	for _, e := range src.Entries {
+		copy.Entries = append(copy.Entries, models.RoutineEntry{
+			ExerciseID: e.ExerciseID,
+			Order:      e.Order,
+			Sets:       e.Sets,
+			Reps:       e.Reps,
+			Weight:     e.Weight,
+		})
+	}
+	res, err := s.repo.CreateRoutine(copy)
+	if err != nil {
+		return "", err
+	}
+	if oid, ok := res.InsertedID.(primitive.ObjectID); ok {
+		return oid.Hex(), nil
+	}
+	return "", nil
 }
 
-func (s *RoutineService) AddEntry(routineIDHex string, entry models.RoutineEntry, ownerHex string) (*mongo.UpdateResult, error) {
-	if routineIDHex == "" {
-		return nil, errors.New("routine id required")
+func validateRoutineEntries(entries []dto.RoutineEntryDTO) error {
+	if len(entries) == 0 {
+		return errors.New("la rutina debe contener al menos un ejercicio")
 	}
-	if ownerHex == "" {
-		return nil, errors.New("owner id required")
+	orders := make(map[int]bool)
+	for i, e := range entries {
+		if e.ExerciseID == "" {
+			return fmt.Errorf("entry %d: exercise_id requerido", i)
+		}
+		if _, err := primitive.ObjectIDFromHex(e.ExerciseID); err != nil {
+			return fmt.Errorf("entry %d: exercise_id inválido: %w", i, err)
+		}
+		if e.Order <= 0 {
+			return fmt.Errorf("entry %d: order debe ser > 0", i)
+		}
+		if orders[e.Order] {
+			return fmt.Errorf("entry %d: order duplicado (%d)", i, e.Order)
+		}
+		orders[e.Order] = true
+		if e.Sets <= 0 {
+			return fmt.Errorf("entry %d: sets debe ser > 0", i)
+		}
+		if e.Reps <= 0 {
+			return fmt.Errorf("entry %d: reps debe ser > 0", i)
+		}
 	}
-	routine, err := s.repo.GetRoutineByID(routineIDHex)
-	if err != nil {
-		return nil, err
-	}
-	ownerID, err := primitive.ObjectIDFromHex(ownerHex)
-	if err != nil {
-		return nil, err
-	}
-	if routine.OwnerID != ownerID {
-		return nil, errors.New("forbidden: not the owner")
-	}
-	routine.Entries = append(routine.Entries, entry)
-	routine.UpdatedAt = time.Now()
-	return s.repo.UpdateRoutine(routine)
+	return nil
 }
 
-func (s *RoutineService) UpdateEntry(routineIDHex string, index int, entry models.RoutineEntry, ownerHex string) (*mongo.UpdateResult, error) {
-	if routineIDHex == "" {
-		return nil, errors.New("routine id required")
+func (s *RoutineService) verifyExercisesExist(ids []primitive.ObjectID) error {
+	if len(ids) == 0 {
+		return nil
 	}
-	if ownerHex == "" {
-		return nil, errors.New("owner id required")
+	missing := make([]string, 0)
+	seen := make(map[string]bool)
+	for _, id := range ids {
+		if id.IsZero() {
+			continue
+		}
+		h := id.Hex()
+		if seen[h] {
+			continue
+		}
+		seen[h] = true
+		exists, err := s.exerciseRepo.GetExerciseByID(h)
+		if err != nil {
+			return err
+		}
+		if exists.ID.IsZero() {
+			missing = append(missing, h)
+		}
 	}
-	routine, err := s.repo.GetRoutineByID(routineIDHex)
-	if err != nil {
-		return nil, err
+	if len(missing) > 0 {
+		return fmt.Errorf("exercises not found: %s", strings.Join(missing, ","))
 	}
-	ownerID, err := primitive.ObjectIDFromHex(ownerHex)
-	if err != nil {
-		return nil, err
-	}
-	if routine.OwnerID != ownerID {
-		return nil, errors.New("forbidden: not the owner")
-	}
-	if index < 0 || index >= len(routine.Entries) {
-		return nil, errors.New("entry index out of range")
-	}
-	routine.Entries[index] = entry
-	routine.UpdatedAt = time.Now()
-	return s.repo.UpdateRoutine(routine)
+	return nil
 }
 
-func (s *RoutineService) RemoveEntry(routineIDHex string, index int, ownerHex string) (*mongo.UpdateResult, error) {
-	if routineIDHex == "" {
-		return nil, errors.New("routine id required")
+func routineModelToResponse(m models.Routine) RoutineResponseDTO {
+	entries := make([]dto.RoutineEntryDTO, 0, len(m.Entries))
+	for _, e := range m.Entries {
+		entries = append(entries, dto.RoutineEntryDTO{
+			ExerciseID: e.ExerciseID.Hex(),
+			Order:      e.Order,
+			Sets:       e.Sets,
+			Reps:       e.Reps,
+			Weight:     e.Weight,
+		})
 	}
-	if ownerHex == "" {
-		return nil, errors.New("owner id required")
+	return RoutineResponseDTO{
+		ID:          m.ID.Hex(),
+		OwnerID:     m.OwnerID.Hex(),
+		Name:        m.Name,
+		Description: m.Description,
+		Entries:     entries,
+		IsPublic:    m.IsPublic,
+		CreatedAt:   m.CreatedAt,
+		UpdatedAt:   m.UpdatedAt,
 	}
-	routine, err := s.repo.GetRoutineByID(routineIDHex)
-	if err != nil {
-		return nil, err
-	}
-	ownerID, err := primitive.ObjectIDFromHex(ownerHex)
-	if err != nil {
-		return nil, err
-	}
-	if routine.OwnerID != ownerID {
-		return nil, errors.New("forbidden: not the owner")
-	}
-	if index < 0 || index >= len(routine.Entries) {
-		return nil, errors.New("entry index out of range")
-	}
-	routine.Entries = append(routine.Entries[:index], routine.Entries[index+1:]...)
-	routine.UpdatedAt = time.Now()
-	return s.repo.UpdateRoutine(routine)
-}
-
-func newNameOrDefault(newName, original string) string {
-	if newName != "" {
-		return newName
-	}
-	return "Copia de " + original
-}
-
-func duplicateEntries(orig []models.RoutineEntry) []models.RoutineEntry {
-	if len(orig) == 0 {
-		return []models.RoutineEntry{}
-	}
-	cp := make([]models.RoutineEntry, len(orig))
-	copy(cp, orig)
-	return cp
 }
