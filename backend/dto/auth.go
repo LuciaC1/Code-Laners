@@ -1,6 +1,8 @@
 package dto
 
 type AuthResponse struct {
-	Token string `json:"token"`
-	User  User   `json:"user"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresIn    int64  `json:"expiresIn"`
+	User         User   `json:"user"`
 }
