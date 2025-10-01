@@ -31,31 +31,31 @@ func NewUserService(repo repositories.UserRepositoryInterface) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) Register(req dto.RegisterRequest) (string, error) {
+func (s *UserService) Register(req dto.RegisterRequest) (dto.User, error) {
 	if req.Name == "" || req.Email == "" || req.Password == "" || req.DateOfBirth == "" {
-		return "", errors.New("datos incompletos")
+		return dto.User{}, errors.New("datos incompletos")
 	}
 	if !isValidEmail(req.Email) {
-		return "", errors.New("email inválido")
+		return dto.User{}, errors.New("email inválido")
 	}
 	dob, err := time.Parse(time.RFC3339, req.DateOfBirth)
 	if err != nil {
 		dob, err = time.Parse("2006-01-02", req.DateOfBirth)
 		if err != nil {
-			return "", errors.New("date_of_birth formato inválido, use ISO")
+			return dto.User{}, errors.New("date_of_birth formato inválido, use ISO")
 		}
 	}
 	candidates, err := s.repo.GetUser("")
 	if err == nil {
 		for _, u := range candidates {
 			if u.Email == req.Email {
-				return "", errors.New("email ya registrado")
+				return dto.User{}, errors.New("email ya registrado")
 			}
 		}
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", err
+		return dto.User{}, err
 	}
 	now := time.Now()
 	user := models.User{
@@ -79,12 +79,12 @@ func (s *UserService) Register(req dto.RegisterRequest) (string, error) {
 
 	res, err := s.repo.CreateUser(user)
 	if err != nil {
-		return "", err
+		return dto.User{}, err
 	}
-	if oid, ok := res.InsertedID.(primitive.ObjectID); ok {
-		return oid.Hex(), nil
+	if res.InsertedID == nil {
+		return dto.User{}, errors.New("no se pudo crear el usuario")
 	}
-	return "", nil
+	return modelUserToDTO(user), nil
 
 }
 func (s *UserService) Login(req dto.LoginRequest) (dto.User, error) {

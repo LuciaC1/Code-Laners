@@ -16,18 +16,41 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userID primitive.ObjectID, email string) (string, error) {
-	claims := Claims{
+func GenerateToken(userID primitive.ObjectID, email string) (string, string, int64, error) {
+
+	accessExp := time.Now().Add(24 * time.Hour)
+	accessClaims := Claims{
 		UserID: userID.Hex(),
 		Email:  email,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(accessExp),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessStr, err := accessToken.SignedString(jwtSecret)
+	if err != nil {
+		return "", "", 0, err
+	}
+
+	refreshExp := time.Now().Add(7 * 24 * time.Hour)
+	refreshClaims := Claims{
+		UserID: userID.Hex(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(refreshExp),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshStr, err := refreshToken.SignedString(jwtSecret)
+	if err != nil {
+		return "", "", 0, err
+	}
+
+	expiresIn := int64(time.Until(accessExp).Seconds())
+	return accessStr, refreshStr, expiresIn, nil
 }
 
 func ValidateToken(tokenString string) (*Claims, error) {
