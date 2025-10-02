@@ -7,7 +7,7 @@ import (
 
 func ConvertExerciseModelToDTO(exercise models.Exercise) dto.ExerciseDTO {
 	return dto.ExerciseDTO{
-		UserID:      exercise.UserID.Hex(),
+		UserID:      exercise.UserID,
 		Name:        exercise.Name,
 		Description: exercise.Description,
 		Category:    exercise.Category,
