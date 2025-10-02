@@ -84,6 +84,7 @@ func (s *UserService) Register(req dto.RegisterRequest) (dto.User, error) {
 	if res.InsertedID == nil {
 		return dto.User{}, errors.New("no se pudo crear el usuario")
 	}
+	user.PasswordHash = ""
 	return modelUserToDTO(user), nil
 
 }
@@ -108,7 +109,9 @@ func (s *UserService) Login(req dto.LoginRequest) (dto.User, error) {
 	if err := bcrypt.CompareHashAndPassword([]byte(found.PasswordHash), []byte(req.Password)); err != nil {
 		return dto.User{}, errors.New("contraseña incorrecta")
 	}
-	return modelUserToDTO(*found), nil
+	userdto := modelUserToDTO(*found)
+	userdto.PasswordHash = ""
+	return userdto, nil
 }
 
 func (s *UserService) GetUsers(name string) ([]dto.User, error) {
