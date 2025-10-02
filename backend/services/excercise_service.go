@@ -4,12 +4,22 @@ import (
 	"errors"
 	"time"
 
+	"backend/dto"
 	"backend/models"
 	"backend/repositories"
+	"backend/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+type ExerciseInterface interface {
+	GetExercises(name, category, muscleGroup string) ([]models.Exercise, error)
+	GetExerciseByID(id string) (models.Exercise, error)
+	CreateExercise(e models.Exercise, creatorIDHex, actorRole string) (*mongo.InsertOneResult, error)
+	UpdateExercise(idHex string, payload models.Exercise, actorRole string) (*mongo.UpdateResult, error)
+	DeleteExercise(idHex, actorRole string) (*mongo.DeleteResult, error)
+}
 
 type ExerciseService struct {
 	repo repositories.ExerciseRepositoryInterface
@@ -29,35 +39,17 @@ func (s *ExerciseService) GetExerciseByID(id string) (models.Exercise, error) {
 	}
 	return s.repo.GetExerciseByID(id)
 }
-
-func (s *ExerciseService) CreateExercise(e models.Exercise, creatorIDHex, actorRole string) (*mongo.InsertOneResult, error) {
-	if actorRole != "admin" {
-		return nil, errors.New("forbidden: only admins can create exercises")
-	}
-	if e.Name == "" {
-		return nil, errors.New("exercise name is required")
-	}
-	if e.Category == "" {
-		return nil, errors.New("category is required")
-	}
-	if e.MuscleGroup == "" {
-		return nil, errors.New("muscle group is required")
-	}
-	if e.Difficulty == "" {
-		return nil, errors.New("difficulty is required")
-	}
-
-	creatorOID, err := primitive.ObjectIDFromHex(creatorIDHex)
+func (service *ExerciseService) CreateExercise(exercise dto.ExerciseDTO) (dto.ExerciseDTO, error) {
+	modelExercise := utils.ConvertRequestToExerciseModel(exercise)
+	result, err := service.repo.CreateExercise(modelExercise)
 	if err != nil {
-		return nil, err
+		return dto.ExerciseDTO{}, err
 	}
-
-	now := time.Now()
-	e.CreatedBy = creatorOID
-	e.CreatedAt = now
-	e.UpdatedAt = now
-
-	return s.repo.CreateExercise(e)
+	createdExercise, err := service.repo.GetExerciseByID(result.InsertedID.(primitive.ObjectID).Hex())
+	if err != nil {
+		return dto.ExerciseDTO{}, err
+	}
+	return utils.ConvertExerciseModelToDTO(createdExercise), nil
 }
 
 func (s *ExerciseService) UpdateExercise(idHex string, payload models.Exercise, actorRole string) (*mongo.UpdateResult, error) {

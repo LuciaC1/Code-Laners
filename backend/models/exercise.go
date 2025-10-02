@@ -16,7 +16,6 @@ type Exercise struct {
 	Difficulty  string             `bson:"difficulty" json:"difficulty"`
 	MediaURL    string             `bson:"media_url,omitempty" json:"media_url,omitempty"`
 	Steps       []string           `bson:"steps,omitempty" json:"steps,omitempty"`
-	CreatedBy   primitive.ObjectID `bson:"created_by" json:"created_by"`
 	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt   time.Time          `bson:"updated_at" json:"updated_at"`
 }

@@ -94,7 +94,6 @@ func (repository ExerciseRepository) UpdateExercise(exercise models.Exercise) (*
 		"difficulty":   exercise.Difficulty,
 		"media_url":    exercise.MediaURL,
 		"steps":        exercise.Steps,
-		"created_by":   exercise.CreatedBy,
 		"updated_at":   exercise.UpdatedAt,
 	}}
 
