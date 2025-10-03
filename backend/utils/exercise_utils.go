@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-func ConvertExerciseModelToDTO(exercise models.Exercise) dto.ExerciseDTO {
-	return dto.ExerciseDTO{
+func ConvertExerciseModelToDTO(exercise models.Exercise) dto.ExerciseResponse {
+	return dto.ExerciseResponse{
 		UserID:      exercise.UserID,
 		Name:        exercise.Name,
 		Description: exercise.Description,
@@ -18,8 +18,8 @@ func ConvertExerciseModelToDTO(exercise models.Exercise) dto.ExerciseDTO {
 		Steps:       exercise.Steps,
 	}
 }
-func ConvertExerciseModelsToDTOList(exercises []models.Exercise) []dto.ExerciseDTO {
-	dtos := make([]dto.ExerciseDTO, len(exercises))
+func ConvertExerciseModelsToDTOList(exercises []models.Exercise) []dto.ExerciseResponse {
+	dtos := make([]dto.ExerciseResponse, len(exercises))
 	for i, exercise := range exercises {
 		dtos[i] = ConvertExerciseModelToDTO(exercise)
 	}
@@ -33,7 +33,7 @@ func ConvertModelToExerciseRequest(exercise models.Exercise) dto.ExerciseRequest
 		MuscleGroup: exercise.MuscleGroup,
 	}
 }
-func ConvertRequestToExerciseModel(request dto.ExerciseDTO) models.Exercise {
+func ConvertRequestToExerciseModel(request dto.ExerciseRequest) models.Exercise {
 	return models.Exercise{
 		UserID:      request.UserID,
 		Name:        request.Name,
