@@ -102,18 +102,13 @@ func (h *ExerciseHandler) DeleteExercise(c *gin.Context) {
 	userRole, _ := c.Get("user_role")
 	role := userRole.(string)
 
-	result, err := h.service.DeleteExercise(id, role)
+	err := h.service.DeleteExercise(id, role)
 	if err != nil {
 		if err.Error() == "forbidden: only admins can delete exercises" {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete exercise"})
-		return
-	}
-
-	if result.DeletedCount == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Exercise not found"})
 		return
 	}
 

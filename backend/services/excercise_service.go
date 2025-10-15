@@ -10,7 +10,6 @@ import (
 	"backend/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ExerciseInterface interface {
@@ -18,7 +17,8 @@ type ExerciseInterface interface {
 	GetExerciseByID(id string) (models.Exercise, error)
 	CreateExercise(exercise dto.ExerciseRequest) (dto.ExerciseResponse, error)
 	UpdateExercise(id string, exercise dto.ExerciseRequest) (dto.ExerciseResponse, error)
-	DeleteExercise(idHex, actorRole string) (*mongo.DeleteResult, error)
+	DeleteExercise(ownerID, exerciseID string) error
+	SearchExercises(search dto.ExerciseSearch) ([]dto.ExerciseResponse, error) // new function signature
 }
 
 type ExerciseService struct {
@@ -39,8 +39,38 @@ func (s *ExerciseService) GetExerciseByID(id string) (models.Exercise, error) {
 	}
 	return s.repo.GetExerciseByID(id)
 }
+
+func validateExerciseRequest(request dto.ExerciseRequest) error {
+	if request.UserID == "" {
+		return errors.New("user id is required")
+	}
+	if request.Name == "" {
+		return errors.New("name is required")
+	}
+	if request.Category == "" {
+		return errors.New("category is required")
+	}
+	if request.MuscleGroup == "" {
+		return errors.New("muscle group is required")
+	}
+	if request.Difficulty == "" {
+		return errors.New("difficulty is required")
+	}
+
+	if _, err := primitive.ObjectIDFromHex(request.UserID); err != nil {
+		return errors.New("invalid user id")
+	}
+	return nil
+}
+
 func (service *ExerciseService) CreateExercise(exercise dto.ExerciseRequest) (dto.ExerciseResponse, error) {
+
+	if err := validateExerciseRequest(exercise); err != nil {
+		return dto.ExerciseResponse{}, err
+	}
+
 	modelExercise := utils.ConvertRequestToExerciseModel(exercise)
+
 	result, err := service.repo.CreateExercise(modelExercise)
 	if err != nil {
 		return dto.ExerciseResponse{}, err
@@ -53,6 +83,18 @@ func (service *ExerciseService) CreateExercise(exercise dto.ExerciseRequest) (dt
 }
 
 func (service *ExerciseService) UpdateExercise(id string, exercise dto.ExerciseRequest) (dto.ExerciseResponse, error) {
+	if err := validateExerciseRequest(exercise); err != nil {
+		return dto.ExerciseResponse{}, err
+	}
+
+	existing, err := service.repo.GetExerciseByID(id)
+	if err != nil {
+		return dto.ExerciseResponse{}, err
+	}
+	if existing.UserID != exercise.UserID {
+		return dto.ExerciseResponse{}, errors.New("unauthorized: cannot update exercise you do not own")
+	}
+
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return dto.ExerciseResponse{}, errors.New("invalid id")
@@ -70,16 +112,29 @@ func (service *ExerciseService) UpdateExercise(id string, exercise dto.ExerciseR
 	return utils.ConvertExerciseModelToDTO(modelExercise), nil
 }
 
-func (s *ExerciseService) DeleteExercise(idHex, actorRole string) (*mongo.DeleteResult, error) {
-	if actorRole != "admin" {
-		return nil, errors.New("forbidden: only admins can delete exercises")
+func (s *ExerciseService) DeleteExercise(ownerID, exerciseID string) error {
+	if ownerID == "" {
+		return errors.New("owner id is required")
 	}
-	if idHex == "" {
-		return nil, errors.New("id required")
+	existing, err := s.repo.GetExerciseByID(exerciseID)
+	if err != nil {
+		return err
 	}
-	deletedId, err := primitive.ObjectIDFromHex(idHex)
+	if existing.UserID != ownerID {
+		return errors.New("unauthorized: cannot delete exercise you do not own")
+	}
+	objID, err := primitive.ObjectIDFromHex(exerciseID)
+	if err != nil {
+		return err
+	}
+	_, err = s.repo.DeleteExercise(objID)
+	return err
+}
+
+func (s *ExerciseService) SearchExercises(search dto.ExerciseSearch) ([]dto.ExerciseResponse, error) {
+	exercises, err := s.repo.GetExercises(search.Name, search.Category, search.MuscleGroup)
 	if err != nil {
 		return nil, err
 	}
-	return s.repo.DeleteExercise(deletedId)
+	return utils.ConvertExerciseModelsToDTOList(exercises), nil
 }
