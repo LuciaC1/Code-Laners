@@ -32,6 +32,19 @@ type RegisterRequest struct {
 	Goals       []string `json:"goals,omitempty"`
 }
 
+type RegisterResponse struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Email       string    `json:"email"`
+	DateOfBirth time.Time `json:"date_of_birth"`
+	Weight      *float64  `json:"weight,omitempty"`
+	Height      *float64  `json:"height,omitempty"`
+	Level       string    `json:"level,omitempty"`
+	Goals       []string  `json:"goals,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`

@@ -5,10 +5,10 @@ import (
 	"backend/models"
 )
 
-func ConverModelToRoutineDTO(routine models.Routine) dto.RoutineDTO {
-	entries := make([]dto.RoutineEntryDTO, len(routine.Entries))
+func ConverModelToRoutineDTO(routine models.Routine) dto.RoutineResponse {
+	entries := make([]dto.RoutineExcerciseList, len(routine.Entries))
 	for i, entry := range routine.Entries {
-		entries[i] = dto.RoutineEntryDTO{
+		entries[i] = dto.RoutineExcerciseList{
 			ExerciseID: entry.ExerciseID.Hex(),
 			Order:      entry.Order,
 			Sets:       entry.Sets,
@@ -16,15 +16,18 @@ func ConverModelToRoutineDTO(routine models.Routine) dto.RoutineDTO {
 			Weight:     entry.Weight,
 		}
 	}
-	return dto.RoutineDTO{
+	return dto.RoutineResponse{
+		ID:          routine.ID.Hex(),
+		UserID:      routine.OwnerID.Hex(),
 		Name:        routine.Name,
+		Excercises:  entries,
 		Description: routine.Description,
-		Entries:     entries,
 		IsPublic:    routine.IsPublic,
 	}
 }
-func ConvertModelToRoutineEntryDTO(entry models.RoutineEntry) dto.RoutineEntryDTO {
-	return dto.RoutineEntryDTO{
+
+func ConvertModelToRoutineExcerciseListDTO(entry models.RoutineExcerciseList) dto.RoutineExcerciseList {
+	return dto.RoutineExcerciseList{
 		ExerciseID: entry.ExerciseID.Hex(),
 		Order:      entry.Order,
 		Sets:       entry.Sets,

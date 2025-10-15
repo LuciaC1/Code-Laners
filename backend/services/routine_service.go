@@ -9,26 +9,16 @@ import (
 	"backend/dto"
 	"backend/models"
 	"backend/repositories"
+	"backend/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type RoutineResponseDTO struct {
-	ID          string                `json:"id"`
-	OwnerID     string                `json:"owner_id"`
-	Name        string                `json:"name"`
-	Description string                `json:"description,omitempty"`
-	Entries     []dto.RoutineEntryDTO `json:"entries"`
-	IsPublic    bool                  `json:"is_public"`
-	CreatedAt   time.Time             `json:"created_at"`
-	UpdatedAt   time.Time             `json:"updated_at"`
-}
-
 type RoutineServiceInterface interface {
-	CreateRoutine(ownerID string, input dto.RoutineDTO) (string, error)
-	GetRoutines(ownerID string, name string) ([]RoutineResponseDTO, error)
-	GetRoutineByID(id string) (RoutineResponseDTO, error)
-	UpdateRoutine(ownerID string, routineID string, input dto.RoutineDTO) error
+	CreateRoutine(ownerID string, input dto.RoutineRequest) (dto.RoutineResponse, error)
+	GetRoutines(ownerID string, name string) ([]dto.RoutineResponse, error)
+	GetRoutineByID(id string) (dto.RoutineResponse, error)
+	UpdateRoutine(ownerID string, routineID string, input dto.RoutineRequest) (dto.RoutineResponse, error)
 	DeleteRoutine(ownerID string, routineID string) error
 	DuplicateRoutine(ownerID string, sourceRoutineID string, newName string) (string, error)
 }
@@ -39,41 +29,44 @@ type RoutineService struct {
 }
 
 func NewRoutineService(repo repositories.RoutineRepositoryInterface, exerciseRepo repositories.ExerciseRepositoryInterface) *RoutineService {
-	return &RoutineService{repo: repo, exerciseRepo: exerciseRepo}
+	return &RoutineService{
+		repo:         repo,
+		exerciseRepo: exerciseRepo,
+	}
 }
 
-func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineDTO) (string, error) {
+func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineRequest) (dto.RoutineResponse, error) {
 	if ownerID == "" {
-		return "", errors.New("ownerID requerido")
+		return dto.RoutineResponse{}, errors.New("ownerID requerido")
 	}
 	own, err := primitive.ObjectIDFromHex(ownerID)
 	if err != nil {
-		return "", fmt.Errorf("ownerID inválido: %w", err)
+		return dto.RoutineResponse{}, fmt.Errorf("ownerID inválido: %w", err)
 	}
-	if err := validateRoutineEntries(input.Entries); err != nil {
-		return "", err
+	if err := validateRoutineEntries(input.Excercises); err != nil {
+		return dto.RoutineResponse{}, err
 	}
 	var exIDs []primitive.ObjectID
-	for _, e := range input.Entries {
+	for _, e := range input.Excercises {
 		id, _ := primitive.ObjectIDFromHex(e.ExerciseID)
 		exIDs = append(exIDs, id)
 	}
 	if err := s.verifyExercisesExist(exIDs); err != nil {
-		return "", err
+		return dto.RoutineResponse{}, err
 	}
 	routine := models.Routine{
 		ID:          primitive.NewObjectID(),
 		OwnerID:     own,
-		Name:        input.Name,
+		Name:        input.Name, // can be used to organize routines (e.g. "legs")
 		Description: input.Description,
 		IsPublic:    input.IsPublic,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	routine.Entries = make([]models.RoutineEntry, 0, len(input.Entries))
-	for _, e := range input.Entries {
+	routine.Entries = make([]models.RoutineExcerciseList, 0, len(input.Excercises))
+	for _, e := range input.Excercises {
 		exID, _ := primitive.ObjectIDFromHex(e.ExerciseID)
-		routine.Entries = append(routine.Entries, models.RoutineEntry{
+		routine.Entries = append(routine.Entries, models.RoutineExcerciseList{
 			ExerciseID: exID,
 			Order:      e.Order,
 			Sets:       e.Sets,
@@ -84,15 +77,16 @@ func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineDTO) (st
 
 	res, err := s.repo.CreateRoutine(routine)
 	if err != nil {
-		return "", err
+		return dto.RoutineResponse{}, err
 	}
 	if oid, ok := res.InsertedID.(primitive.ObjectID); ok {
-		return oid.Hex(), nil
+		routine.ID = oid
+		return utils.ConverModelToRoutineDTO(routine), nil
 	}
-	return "", nil
+	return dto.RoutineResponse{}, nil
 }
 
-func (s *RoutineService) GetRoutines(ownerID string, name string) ([]RoutineResponseDTO, error) {
+func (s *RoutineService) GetRoutines(ownerID string, name string) ([]dto.RoutineResponse, error) {
 	if ownerID == "" {
 		return nil, errors.New("ownerID requerido")
 	}
@@ -104,52 +98,52 @@ func (s *RoutineService) GetRoutines(ownerID string, name string) ([]RoutineResp
 	if err != nil {
 		return nil, err
 	}
-	out := make([]RoutineResponseDTO, 0, len(modelsList))
+	out := make([]dto.RoutineResponse, 0, len(modelsList))
 	for _, m := range modelsList {
-		out = append(out, routineModelToResponse(m))
+		out = append(out, utils.ConverModelToRoutineDTO(m))
 	}
 	return out, nil
 }
 
-func (s *RoutineService) GetRoutineByID(id string) (RoutineResponseDTO, error) {
+func (s *RoutineService) GetRoutineByID(id string) (dto.RoutineResponse, error) {
 	m, err := s.repo.GetRoutineByID(id)
 	if err != nil {
-		return RoutineResponseDTO{}, err
+		return dto.RoutineResponse{}, err
 	}
-	return routineModelToResponse(m), nil
+	return utils.ConverModelToRoutineDTO(m), nil
 }
 
-func (s *RoutineService) UpdateRoutine(ownerID string, routineID string, input dto.RoutineDTO) error {
+func (s *RoutineService) UpdateRoutine(ownerID string, routineID string, input dto.RoutineRequest) (dto.RoutineResponse, error) {
 	existing, err := s.repo.GetRoutineByID(routineID)
 	if err != nil {
-		return err
+		return dto.RoutineResponse{}, err
 	}
 	own, err := primitive.ObjectIDFromHex(ownerID)
 	if err != nil {
-		return err
+		return dto.RoutineResponse{}, err
 	}
 	if existing.OwnerID != own {
-		return errors.New("no autorizado: no es el owner de la rutina")
+		return dto.RoutineResponse{}, errors.New("no autorizado: no es el owner de la rutina")
 	}
-	if err := validateRoutineEntries(input.Entries); err != nil {
-		return err
+	if err := validateRoutineEntries(input.Excercises); err != nil {
+		return dto.RoutineResponse{}, err
 	}
 	var exIDs []primitive.ObjectID
-	for _, e := range input.Entries {
+	for _, e := range input.Excercises {
 		id, _ := primitive.ObjectIDFromHex(e.ExerciseID)
 		exIDs = append(exIDs, id)
 	}
 	if err := s.verifyExercisesExist(exIDs); err != nil {
-		return err
+		return dto.RoutineResponse{}, err
 	}
 	existing.Name = input.Name
 	existing.Description = input.Description
 	existing.IsPublic = input.IsPublic
 	existing.UpdatedAt = time.Now()
-	existing.Entries = make([]models.RoutineEntry, 0, len(input.Entries))
-	for _, e := range input.Entries {
+	existing.Entries = make([]models.RoutineExcerciseList, 0, len(input.Excercises))
+	for _, e := range input.Excercises {
 		exID, _ := primitive.ObjectIDFromHex(e.ExerciseID)
-		existing.Entries = append(existing.Entries, models.RoutineEntry{
+		existing.Entries = append(existing.Entries, models.RoutineExcerciseList{
 			ExerciseID: exID,
 			Order:      e.Order,
 			Sets:       e.Sets,
@@ -158,7 +152,14 @@ func (s *RoutineService) UpdateRoutine(ownerID string, routineID string, input d
 		})
 	}
 	_, err = s.repo.UpdateRoutine(existing)
-	return err
+	if err != nil {
+		return dto.RoutineResponse{}, err
+	}
+	updated, err := s.repo.GetRoutineByID(routineID)
+	if err != nil {
+		return dto.RoutineResponse{}, err
+	}
+	return utils.ConverModelToRoutineDTO(updated), nil
 }
 
 func (s *RoutineService) DeleteRoutine(ownerID string, routineID string) error {
@@ -205,9 +206,9 @@ func (s *RoutineService) DuplicateRoutine(ownerID string, sourceRoutineID string
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	copy.Entries = make([]models.RoutineEntry, 0, len(src.Entries))
+	copy.Entries = make([]models.RoutineExcerciseList, 0, len(src.Entries))
 	for _, e := range src.Entries {
-		copy.Entries = append(copy.Entries, models.RoutineEntry{
+		copy.Entries = append(copy.Entries, models.RoutineExcerciseList{
 			ExerciseID: e.ExerciseID,
 			Order:      e.Order,
 			Sets:       e.Sets,
@@ -225,7 +226,7 @@ func (s *RoutineService) DuplicateRoutine(ownerID string, sourceRoutineID string
 	return "", nil
 }
 
-func validateRoutineEntries(entries []dto.RoutineEntryDTO) error {
+func validateRoutineEntries(entries []dto.RoutineExcerciseList) error {
 	if len(entries) == 0 {
 		return errors.New("la rutina debe contener al menos un ejercicio")
 	}
@@ -281,27 +282,4 @@ func (s *RoutineService) verifyExercisesExist(ids []primitive.ObjectID) error {
 		return fmt.Errorf("exercises not found: %s", strings.Join(missing, ","))
 	}
 	return nil
-}
-
-func routineModelToResponse(m models.Routine) RoutineResponseDTO {
-	entries := make([]dto.RoutineEntryDTO, 0, len(m.Entries))
-	for _, e := range m.Entries {
-		entries = append(entries, dto.RoutineEntryDTO{
-			ExerciseID: e.ExerciseID.Hex(),
-			Order:      e.Order,
-			Sets:       e.Sets,
-			Reps:       e.Reps,
-			Weight:     e.Weight,
-		})
-	}
-	return RoutineResponseDTO{
-		ID:          m.ID.Hex(),
-		OwnerID:     m.OwnerID.Hex(),
-		Name:        m.Name,
-		Description: m.Description,
-		Entries:     entries,
-		IsPublic:    m.IsPublic,
-		CreatedAt:   m.CreatedAt,
-		UpdatedAt:   m.UpdatedAt,
-	}
 }
