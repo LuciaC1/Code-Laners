@@ -65,7 +65,6 @@ func UpdateWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 		return
 	}
 
-	// Verify the workout exists and belongs to the user
 	existingWorkout, err := workoutService.GetWorkoutByID(workoutID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Workout no encontrado"})
@@ -108,7 +107,6 @@ func DeleteWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 		return
 	}
 
-	// Verify the workout exists and belongs to the user
 	existingWorkout, err := workoutService.GetWorkoutByID(workoutID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Workout no encontrado"})

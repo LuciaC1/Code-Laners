@@ -18,7 +18,7 @@ type ExerciseInterface interface {
 	CreateExercise(exercise dto.ExerciseRequest) (dto.ExerciseResponse, error)
 	UpdateExercise(id string, exercise dto.ExerciseRequest) (dto.ExerciseResponse, error)
 	DeleteExercise(ownerID, exerciseID string) error
-	SearchExercises(search dto.ExerciseSearch) ([]dto.ExerciseResponse, error) // new function signature
+	SearchExercises(search dto.ExerciseSearch) ([]dto.ExerciseResponse, error)
 }
 
 type ExerciseService struct {

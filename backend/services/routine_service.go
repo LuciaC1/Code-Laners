@@ -57,7 +57,7 @@ func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineRequest)
 	routine := models.Routine{
 		ID:          primitive.NewObjectID(),
 		OwnerID:     own,
-		Name:        input.Name, // can be used to organize routines (e.g. "legs")
+		Name:        input.Name,
 		Description: input.Description,
 		IsPublic:    input.IsPublic,
 		CreatedAt:   time.Now(),
