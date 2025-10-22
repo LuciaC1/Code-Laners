@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crea tu cuenta - App de Fitness</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#A2D5AB",
+            "background-light": "#F8F8F8",
+            "background-dark": "#112121",
+            "text-light": "#333333",
+            "text-dark": "#f8f8f8",
+            "accent": "#555555",
+            "error": "#FFB6B6",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "lg": "0.75rem",
+            "xl": "1rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/main.css"/>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white dark:bg-background-dark shadow-md rounded-lg p-6">
+      <div class="flex flex-col items-center mb-8">
+        <span class="material-symbols-outlined text-primary text-5xl mb-2">fitness_center</span>
+        <h1 class="text-3xl font-bold text-center">Crea tu cuenta</h1>
+        <p class="mt-2 text-base text-accent dark:text-gray-300 text-center">Empieza tu viaje hacia una vida más saludable</p>
+      </div>
+      <form class="flex flex-col gap-4">
+        <div class="flex flex-col">
+          <label class="pb-2 text-base font-medium" for="fullName">Nombre completo</label>
+          <input class="form-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-accent bg-white dark:bg-background-dark h-12 p-3 placeholder:text-gray-400 dark:placeholder:text-gray-500" id="fullName" placeholder="Introduce tu nombre" type="text"/>
+        </div>
+        <div class="flex flex-col">
+          <label class="pb-2 text-base font-medium" for="email">Correo electrónico</label>
+          <input class="form-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-accent bg-white dark:bg-background-dark h-12 p-3 placeholder:text-gray-400 dark:placeholder:text-gray-500" id="email" placeholder="tuemail@ejemplo.com" type="email"/>
+        </div>
+        <div class="flex flex-col">
+          <label class="pb-2 text-base font-medium" for="password">Contraseña</label>
+          <div class="relative">
+            <input class="form-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-accent bg-white dark:bg-background-dark h-12 p-3 pr-12 placeholder:text-gray-400 dark:placeholder:text-gray-500" id="password" placeholder="Crea una contraseña segura" type="password"/>
+            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-4 text-accent dark:text-gray-400" onclick="const p = document.getElementById('password'); p.type = p.type === 'password' ? 'text' : 'password'; this.children[0].textContent = p.type === 'password' ? 'visibility' : 'visibility_off'">
+              <span class="material-symbols-outlined">visibility</span>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="mt-4 w-full h-12 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors duration-300 text-lg">Registrarse</button>
+      </form>
+      <div class="mt-6 text-center">
+        <p class="text-base text-accent dark:text-gray-400">¿Ya tienes una cuenta? <a class="font-medium text-primary hover:underline" href="#">Inicia sesión</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
