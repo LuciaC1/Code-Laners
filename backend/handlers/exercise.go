@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"backend/dto"
+	"backend/middleware"
 	"backend/services"
 	"net/http"
 
@@ -19,7 +20,6 @@ func NewExerciseHandler(service services.ExerciseInterface) *ExerciseHandler {
 func (h *ExerciseHandler) GetExercise(c *gin.Context) {
 
 	if id := c.Param("id"); id != "" {
-
 		exercise, err := h.service.GetExerciseByID(id)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Exercise not found"})
@@ -45,19 +45,21 @@ func (h *ExerciseHandler) GetExercise(c *gin.Context) {
 }
 
 func (h *ExerciseHandler) CreateExercise(c *gin.Context) {
-	var exerciseReq dto.ExerciseRequest
-	if err := c.ShouldBindJSON(&exerciseReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
+	middleware.RequireRole("admin")(c)
+	if c.IsAborted() {
+		return
+	}
+	var exerciseReq dto.ExerciseRequest
+	if err := c.ShouldBindJSON(&exerciseReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	exerciseReq.UserID = userID.(string)
-
 	exercise, err := h.service.CreateExercise(exerciseReq)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create exercise"})
@@ -68,21 +70,26 @@ func (h *ExerciseHandler) CreateExercise(c *gin.Context) {
 }
 
 func (h *ExerciseHandler) UpdateExercise(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+	middleware.RequireRole("admin")(c)
+	if c.IsAborted() {
+		return
+	}
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing exercise ID"})
 		return
 	}
-
 	var exerciseReq dto.ExerciseRequest
 	if err := c.ShouldBindJSON(&exerciseReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	userID, _ := c.Get("user_id")
 	exerciseReq.UserID = userID.(string)
-
 	exercise, err := h.service.UpdateExercise(id, exerciseReq)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update exercise"})
@@ -93,16 +100,22 @@ func (h *ExerciseHandler) UpdateExercise(c *gin.Context) {
 }
 
 func (h *ExerciseHandler) DeleteExercise(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+	middleware.RequireRole("admin")(c)
+	if c.IsAborted() {
+		return
+	}
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing exercise ID"})
 		return
 	}
 
-	userRole, _ := c.Get("user_role")
-	role := userRole.(string)
-
-	err := h.service.DeleteExercise(id, role)
+	err := h.service.DeleteExercise(id, userID.(string))
 	if err != nil {
 		if err.Error() == "forbidden: only admins can delete exercises" {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
