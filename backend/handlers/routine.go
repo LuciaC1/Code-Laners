@@ -16,23 +16,37 @@ type RoutineHandler struct {
 func NewRoutineHandler(service services.RoutineServiceInterface) *RoutineHandler {
 	return &RoutineHandler{service: service}
 }
-
-func (h *RoutineHandler) GetRoutine(c *gin.Context) {
-	if id := c.Param("id"); id != "" {
-		routine, err := h.service.GetRoutineByID(id)
-		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Routine not found"})
-			return
-		}
-		c.JSON(http.StatusOK, routine)
-		return
-	}
-
+func (h *RoutineHandler) GetRoutineByID(c *gin.Context) {
 	userID, ok := c.Get("user_id")
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing routine ID"})
+		return
+	}
+	routine, err := h.service.GetRoutineByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Routine not found"})
+		return
+	}
+	if routine.UserID != userID.(string) && !routine.IsPublic {
+		c.JSON(http.StatusForbidden, gin.H{"error": "no autorizado: acceso restringido"})
+		return
+	}
+
+	c.JSON(http.StatusOK, routine)
+}
+
+func (h *RoutineHandler) GetRoutines(c *gin.Context) {
+	userID, ok := c.Get("user_id")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
 	name := c.Query("name")
 	routines, err := h.service.GetRoutines(userID.(string), name)
 	if err != nil {
