@@ -17,12 +17,13 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userID primitive.ObjectID, email string) (string, string, int64, error) {
+func GenerateToken(userID primitive.ObjectID, email string, role string) (string, string, int64, error) {
 
 	accessExp := time.Now().Add(24 * time.Hour)
 	accessClaims := Claims{
 		UserID: userID.Hex(),
 		Email:  email,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(accessExp),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -38,6 +39,7 @@ func GenerateToken(userID primitive.ObjectID, email string) (string, string, int
 	refreshExp := time.Now().Add(7 * 24 * time.Hour)
 	refreshClaims := Claims{
 		UserID: userID.Hex(),
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(refreshExp),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -68,4 +70,26 @@ func ValidateToken(tokenString string) (*Claims, error) {
 	}
 
 	return nil, errors.New("invalid token")
+}
+
+func GenerateAccessTokenFromStrings(userID string, email string, role string) (string, int64, error) {
+	accessExp := time.Now().Add(24 * time.Hour)
+	accessClaims := Claims{
+		UserID: userID,
+		Email:  email,
+		Role:   role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(accessExp),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessStr, err := accessToken.SignedString(jwtSecret)
+	if err != nil {
+		return "", 0, err
+	}
+
+	expiresIn := int64(time.Until(accessExp).Seconds())
+	return accessStr, expiresIn, nil
 }

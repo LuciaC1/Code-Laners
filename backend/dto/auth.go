@@ -6,3 +6,12 @@ type AuthResponse struct {
 	ExpiresIn    int64  `json:"expiresIn"`
 	User         User   `json:"user"`
 }
+
+type RefreshRequest struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
+type RefreshResponse struct {
+	AccessToken string `json:"accessToken"`
+	ExpiresIn   int64  `json:"expiresIn"`
+}

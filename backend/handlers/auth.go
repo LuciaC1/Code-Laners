@@ -55,7 +55,7 @@ func (handler *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	access, refresh, expiresIn, err := auth.GenerateToken(user.ID, user.Email)
+	access, refresh, expiresIn, err := auth.GenerateToken(user.ID, user.Email, string(user.Role))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "no se pudieron generar tokens"})
 		return
@@ -66,5 +66,30 @@ func (handler *UserHandler) Login(c *gin.Context) {
 		RefreshToken: refresh,
 		ExpiresIn:    expiresIn,
 		User:         user,
+	})
+}
+
+func (handler *UserHandler) Refresh(c *gin.Context) {
+	var req dto.RefreshRequest
+	if err := c.ShouldBindJSON(&req); err != nil || req.RefreshToken == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "refreshToken es requerido"})
+		return
+	}
+
+	claims, err := auth.ValidateToken(req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "refresh token inválido o expirado"})
+		return
+	}
+
+	access, expiresIn, err := auth.GenerateAccessTokenFromStrings(claims.UserID, claims.Email, claims.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "no se pudo generar access token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.RefreshResponse{
+		AccessToken: access,
+		ExpiresIn:   expiresIn,
 	})
 }
