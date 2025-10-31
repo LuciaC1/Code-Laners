@@ -17,13 +17,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// mockUserService implements services.UserServiceInterface for tests
 type mockUserService struct {
 	registerFn func(req dto.RegisterRequest) (string, error)
 	loginFn    func(req dto.LoginRequest) (dto.User, error)
 }
 
-// Implement the interface methods used by handlers
 func (m *mockUserService) Register(req dto.RegisterRequest) (string, error) {
 	if m.registerFn != nil {
 		return m.registerFn(req)
@@ -37,14 +35,12 @@ func (m *mockUserService) Login(req dto.LoginRequest) (dto.User, error) {
 	return dto.User{}, nil
 }
 
-// The rest of the interface methods are not needed for auth handlers; provide no-op implementations.
 func (m *mockUserService) GetUsers(name string) ([]dto.User, error)                      { return nil, nil }
 func (m *mockUserService) GetUserByID(id string) (dto.User, error)                       { return dto.User{}, nil }
 func (m *mockUserService) UpdateUser(id string, req dto.UpdateUserRequest) error         { return nil }
 func (m *mockUserService) ChangePassword(id string, req dto.ChangePasswordRequest) error { return nil }
 func (m *mockUserService) DeleteUser(id string) error                                    { return nil }
 
-// helper to create a gin context with JSON body
 func makeReq(t *testing.T, method, path string, body interface{}) (*gin.Context, *httptest.ResponseRecorder) {
 	var buf bytes.Buffer
 	if body != nil {
@@ -61,7 +57,7 @@ func makeReq(t *testing.T, method, path string, body interface{}) (*gin.Context,
 }
 
 func TestRegister_Success(t *testing.T) {
-	// arrange
+
 	gin.SetMode(gin.TestMode)
 
 	now := time.Now()
@@ -77,7 +73,7 @@ func TestRegister_Success(t *testing.T) {
 
 	msvc := &mockUserService{
 		registerFn: func(req dto.RegisterRequest) (string, error) {
-			// emulate repository returning an id or message
+
 			return mockedUser.Email, nil
 		},
 	}
@@ -93,14 +89,12 @@ func TestRegister_Success(t *testing.T) {
 
 	c, w := makeReq(t, "POST", "/register", reqBody)
 
-	// act
 	handler.Register(c)
 
-	// assert
 	if w.Code != http.StatusCreated {
 		t.Fatalf("expected status %d got %d", http.StatusCreated, w.Code)
 	}
-	// response is whatever the service returned (we returned email string), so expect JSON string
+
 	var got string
 	if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
@@ -112,7 +106,7 @@ func TestRegister_Success(t *testing.T) {
 
 func TestLogin_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	// arrange
+
 	password := "password123"
 	pwHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -134,7 +128,7 @@ func TestLogin_Success(t *testing.T) {
 
 	msvc := &mockUserService{
 		loginFn: func(req dto.LoginRequest) (dto.User, error) {
-			// return the user when email matches
+
 			if req.Email == returnedUser.Email {
 				return returnedUser, nil
 			}
@@ -151,10 +145,8 @@ func TestLogin_Success(t *testing.T) {
 
 	c, w := makeReq(t, "POST", "/login", reqBody)
 
-	// act
 	handler.Login(c)
 
-	// assert
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected status %d got %d body: %s", http.StatusOK, w.Code, w.Body.String())
 	}

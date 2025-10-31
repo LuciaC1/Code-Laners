@@ -15,7 +15,6 @@ import (
 	"backend/models"
 )
 
-// mockExerciseService implements services.ExerciseInterface for handler tests
 type mockExerciseService struct {
 	getByIDFn func(id string) (models.Exercise, error)
 	getListFn func(name, category, muscleGroup string) ([]models.Exercise, error)
@@ -62,7 +61,6 @@ func (m *mockExerciseService) SearchExercises(search dto.ExerciseSearch) ([]dto.
 	return nil, nil
 }
 
-// helper to create a gin context with JSON body and optional context values
 func makeReqWithCtx(t *testing.T, method, path string, body interface{}, ctxVals map[string]interface{}) (*gin.Context, *httptest.ResponseRecorder) {
 	t.Helper()
 	var buf bytes.Buffer
@@ -108,7 +106,7 @@ func TestGetExercise_ByID_Success(t *testing.T) {
 	h := NewExerciseHandler(svc)
 
 	c, w := makeReqWithCtx(t, "GET", "/exercises/123", nil, nil)
-	// set param
+
 	c.Params = gin.Params{{Key: "id", Value: "123"}}
 
 	h.GetExercise(c)
@@ -142,7 +140,7 @@ func TestGetExercise_Search_Success(t *testing.T) {
 	h := NewExerciseHandler(svc)
 
 	c, w := makeReqWithCtx(t, "GET", "/exercises", nil, nil)
-	// set query params
+
 	q := c.Request.URL.Query()
 	q.Add("name", "Squat")
 	c.Request.URL.RawQuery = q.Encode()
@@ -161,7 +159,7 @@ func TestCreateExercise_Unauthorized(t *testing.T) {
 	h := NewExerciseHandler(svc)
 
 	req := dto.ExerciseRequest{Name: "X", Category: "c", MuscleGroup: "m", Difficulty: "d"}
-	// no user_id in context
+
 	c, w := makeReqWithCtx(t, "POST", "/exercises", req, nil)
 
 	h.CreateExercise(c)
@@ -182,7 +180,7 @@ func TestCreateExercise_Success(t *testing.T) {
 	}
 
 	h := NewExerciseHandler(svc)
-	// include user_id and admin role so middleware.RequireRole won't abort
+
 	ctxVals := map[string]interface{}{"user_id": primitive.NewObjectID().Hex(), "user_role": "admin"}
 	req := dto.ExerciseRequest{Name: "Bench", Category: "c", MuscleGroup: "m", Difficulty: "d"}
 	c, w := makeReqWithCtx(t, "POST", "/exercises", req, ctxVals)
@@ -202,7 +200,6 @@ func TestUpdateExercise_BadRequest_NoID(t *testing.T) {
 	ctxVals := map[string]interface{}{"user_id": primitive.NewObjectID().Hex(), "user_role": "admin"}
 	req := dto.ExerciseRequest{Name: "Bench", Category: "c", MuscleGroup: "m", Difficulty: "d"}
 	c, w := makeReqWithCtx(t, "PUT", "/exercises/", req, ctxVals)
-	// no id param set
 
 	h.UpdateExercise(c)
 
@@ -218,7 +215,6 @@ func TestDeleteExercise_MissingID(t *testing.T) {
 	h := NewExerciseHandler(svc)
 	ctxVals := map[string]interface{}{"user_id": primitive.NewObjectID().Hex(), "user_role": "admin"}
 	c, w := makeReqWithCtx(t, "DELETE", "/exercises/", nil, ctxVals)
-	// no id param set
 
 	h.DeleteExercise(c)
 

@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetUserByID responde con la información pública de un usuario dado su id.
-// Ruta esperada: GET /users/:id (protegida por AuthMiddleware al nivel de rutas).
 func (handler *UserHandler) GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -26,9 +24,6 @@ func (handler *UserHandler) GetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// GetMe responde con la información del usuario autenticado. Se espera que
-// el middleware de autenticación haya puesto "user_id" en el contexto.
-// Ruta esperada: GET /me (protegida por AuthMiddleware).
 func (handler *UserHandler) GetMe(c *gin.Context) {
 	userID, ok := c.Get("user_id")
 	if !ok {
@@ -51,7 +46,6 @@ func (handler *UserHandler) GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// UpdateMe permite al usuario autenticado actualizar su perfil (PUT /me).
 func (handler *UserHandler) UpdateMe(c *gin.Context) {
 	userID, ok := c.Get("user_id")
 	if !ok {
@@ -79,8 +73,6 @@ func (handler *UserHandler) UpdateMe(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Usuario actualizado correctamente"})
 }
 
-// ChangePassword permite al usuario autenticado cambiar su contraseña.
-// Ruta: POST /me/change-password
 func (handler *UserHandler) ChangePassword(c *gin.Context) {
 	userID, ok := c.Get("user_id")
 	if !ok {

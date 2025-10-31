@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type User struct { //Revisar este struct, esta copiado de models.User
+type User struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name         string             `bson:"name" json:"name"`
 	Email        string             `bson:"email" json:"email"`
@@ -25,7 +25,7 @@ type RegisterRequest struct {
 	Name        string   `json:"name" binding:"required,min=2,max=100"`
 	Email       string   `json:"email" binding:"required,email"`
 	Password    string   `json:"password" binding:"required,min=6"`
-	DateOfBirth string   `json:"date_of_birth" binding:"required"` // ISO date string - parsear en servicio
+	DateOfBirth string   `json:"date_of_birth" binding:"required"`
 	Weight      *float64 `json:"weight,omitempty"`
 	Height      *float64 `json:"height,omitempty"`
 	Level       string   `json:"level,omitempty"`
@@ -51,7 +51,7 @@ type LoginRequest struct {
 }
 type UpdateUserRequest struct {
 	Name   string   `json:"name,omitempty"`
-	Email  string   `json:"email,omitempty"` // validar en servicio
+	Email  string   `json:"email,omitempty"`
 	Weight float64  `json:"weight,omitempty"`
 	Height float64  `json:"height,omitempty"`
 	Level  string   `json:"level,omitempty"`

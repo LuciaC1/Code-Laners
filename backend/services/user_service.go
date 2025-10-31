@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"time"
 
+	"backend/database"
 	"backend/dto"
 	"backend/models"
 	"backend/repositories"
@@ -180,6 +181,17 @@ func (s *UserService) ChangePassword(id string, req dto.ChangePasswordRequest) e
 	m.PasswordHash = string(hash)
 	m.UpdatedAt = time.Now()
 	_, err = s.repo.UpdateUser(m)
+	if err != nil {
+		return err
+	}
+
+	// Revocar todos los refresh tokens del usuario para forzar re-login
+	db := database.NewMongoDB()
+	refreshRepo := repositories.NewRefreshTokenRepository(db)
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err == nil {
+		_, _ = refreshRepo.RevokeAllForUser(objID)
+	}
 	return err
 }
 

@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// mockRoutineService is a lightweight mock used only by these handler tests.
 type mockRoutineService struct {
 	GetRoutineByIDFunc func(id string) (dto.RoutineResponse, error)
 	GetRoutinesFunc    func(ownerID, name string) ([]dto.RoutineResponse, error)
@@ -121,7 +120,6 @@ func TestGetRoutineByID_Unauthorized(t *testing.T) {
 func TestGetRoutineByID_NotFoundAndForbidden(t *testing.T) {
 	setupGinTest()
 
-	// NotFound case
 	mock1 := &mockRoutineService{
 		GetRoutineByIDFunc: func(id string) (dto.RoutineResponse, error) {
 			return dto.RoutineResponse{}, errors.New("not found")
@@ -138,7 +136,6 @@ func TestGetRoutineByID_NotFoundAndForbidden(t *testing.T) {
 		t.Fatalf("expected 404, got %d", w1.Code)
 	}
 
-	// Forbidden case: different owner and not public
 	mock2 := &mockRoutineService{
 		GetRoutineByIDFunc: func(id string) (dto.RoutineResponse, error) {
 			return dto.RoutineResponse{ID: id, UserID: "other", IsPublic: false}, nil
@@ -158,7 +155,7 @@ func TestGetRoutineByID_NotFoundAndForbidden(t *testing.T) {
 
 func TestGetRoutines_SuccessAndUnauthorized(t *testing.T) {
 	setupGinTest()
-	// Success
+
 	mock := &mockRoutineService{
 		GetRoutinesFunc: func(ownerID, name string) ([]dto.RoutineResponse, error) {
 			return []dto.RoutineResponse{{ID: "r1", UserID: ownerID, Name: "n1"}}, nil
@@ -176,7 +173,6 @@ func TestGetRoutines_SuccessAndUnauthorized(t *testing.T) {
 		t.Fatalf("expected 200, got %d, body: %s", w.Code, w.Body.String())
 	}
 
-	// Unauthorized
 	w2 := httptest.NewRecorder()
 	c2, _ := gin.CreateTestContext(w2)
 	c2.Request = httptest.NewRequest(http.MethodGet, "/", nil)
@@ -188,13 +184,13 @@ func TestGetRoutines_SuccessAndUnauthorized(t *testing.T) {
 
 func TestCreateRoutine_BadRequestAndSuccess(t *testing.T) {
 	setupGinTest()
-	// Bad request (invalid JSON / missing required fields)
+
 	mock := &mockRoutineService{}
 	handler := NewRoutineHandler(mock)
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	// invalid JSON
+
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString("{invalid}"))
 	req.Header.Set("Content-Type", "application/json")
 	c.Request = req
@@ -203,7 +199,6 @@ func TestCreateRoutine_BadRequestAndSuccess(t *testing.T) {
 		t.Fatalf("expected 400 for bad JSON, got %d", w.Code)
 	}
 
-	// Success
 	mock2 := &mockRoutineService{
 		CreateRoutineFunc: func(ownerID string, input dto.RoutineRequest) (dto.RoutineResponse, error) {
 			return dto.RoutineResponse{ID: "r1", UserID: ownerID, Name: input.Name, Excercises: input.Excercises}, nil
@@ -227,7 +222,6 @@ func TestCreateRoutine_BadRequestAndSuccess(t *testing.T) {
 func TestUpdateAndDeleteRoutine_AuthorizationPaths(t *testing.T) {
 	setupGinTest()
 
-	// Update: forbidden from service
 	mockUpd := &mockRoutineService{
 		UpdateRoutineFunc: func(ownerID, routineID string, input dto.RoutineRequest) (dto.RoutineResponse, error) {
 			return dto.RoutineResponse{}, errors.New("no autorizado: no es el owner de la rutina")
@@ -246,7 +240,6 @@ func TestUpdateAndDeleteRoutine_AuthorizationPaths(t *testing.T) {
 		t.Fatalf("expected 403 for update forbidden, got %d, body: %s", wUpd.Code, wUpd.Body.String())
 	}
 
-	// Delete: success and forbidden
 	mockDel := &mockRoutineService{
 		DeleteRoutineFunc: func(ownerID, routineID string) error { return nil },
 	}
