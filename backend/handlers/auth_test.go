@@ -11,10 +11,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
+	"backend/auth"
 	"backend/dto"
 	"backend/models"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 type mockUserService struct {
@@ -108,7 +107,7 @@ func TestLogin_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	password := "password123"
-	pwHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	pwHash, err := auth.HashPassword(password)
 	if err != nil {
 		t.Fatalf("failed to hash password: %v", err)
 	}

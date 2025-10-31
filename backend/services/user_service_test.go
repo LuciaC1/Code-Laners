@@ -3,12 +3,12 @@ package services
 import (
 	"testing"
 
+	"backend/auth"
 	"backend/dto"
 	"backend/models"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type mockUserRepo struct {
@@ -90,7 +90,7 @@ func TestRegister_DuplicateEmail(t *testing.T) {
 
 func TestLogin_Success(t *testing.T) {
 	pw := "mypw"
-	hash, _ := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+	hash, _ := auth.HashPassword(pw)
 	stored := models.User{ID: primitive.NewObjectID(), Email: "c@example.com", PasswordHash: string(hash)}
 	repo := &mockUserRepo{getUserFn: func(name string) ([]models.User, error) { return []models.User{stored}, nil }}
 	svc := NewUserService(repo)
@@ -104,7 +104,7 @@ func TestLogin_Success(t *testing.T) {
 }
 
 func TestLogin_WrongPassword(t *testing.T) {
-	hash, _ := bcrypt.GenerateFromPassword([]byte("right"), bcrypt.DefaultCost)
+	hash, _ := auth.HashPassword("right")
 	stored := models.User{ID: primitive.NewObjectID(), Email: "d@example.com", PasswordHash: string(hash)}
 	repo := &mockUserRepo{getUserFn: func(name string) ([]models.User, error) { return []models.User{stored}, nil }}
 	svc := NewUserService(repo)
@@ -128,7 +128,7 @@ func TestGetUsers_Mapping(t *testing.T) {
 }
 
 func TestChangePassword_WrongOldPassword(t *testing.T) {
-	hash, _ := bcrypt.GenerateFromPassword([]byte("oldpass"), bcrypt.DefaultCost)
+	hash, _ := auth.HashPassword("oldpass")
 	m := models.User{ID: primitive.NewObjectID(), PasswordHash: string(hash)}
 	repo := &mockUserRepo{getUserByIDFn: func(id string) (models.User, error) { return m, nil }}
 	svc := NewUserService(repo)
@@ -140,7 +140,7 @@ func TestChangePassword_WrongOldPassword(t *testing.T) {
 
 func TestChangePassword_Success(t *testing.T) {
 	old := "oldpass"
-	hash, _ := bcrypt.GenerateFromPassword([]byte(old), bcrypt.DefaultCost)
+	hash, _ := auth.HashPassword(old)
 	m := models.User{ID: primitive.NewObjectID(), PasswordHash: string(hash)}
 	updated := false
 	repo := &mockUserRepo{

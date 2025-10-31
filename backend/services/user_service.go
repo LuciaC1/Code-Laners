@@ -5,13 +5,13 @@ import (
 	"regexp"
 	"time"
 
+	"backend/auth"
 	"backend/database"
 	"backend/dto"
 	"backend/models"
 	"backend/repositories"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type UserServiceInterface interface {
@@ -54,7 +54,7 @@ func (s *UserService) Register(req dto.RegisterRequest) (dto.User, error) {
 			}
 		}
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	hash, err := auth.HashPassword(req.Password)
 	if err != nil {
 		return dto.User{}, err
 	}
@@ -107,7 +107,7 @@ func (s *UserService) Login(req dto.LoginRequest) (dto.User, error) {
 	if found == nil {
 		return dto.User{}, errors.New("usuario no encontrado")
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(found.PasswordHash), []byte(req.Password)); err != nil {
+	if !auth.CheckPasswordHash(req.Password, found.PasswordHash) {
 		return dto.User{}, errors.New("contraseña incorrecta")
 	}
 	userdto := modelUserToDTO(*found)
@@ -171,10 +171,10 @@ func (s *UserService) ChangePassword(id string, req dto.ChangePasswordRequest) e
 	if err != nil {
 		return err
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(m.PasswordHash), []byte(req.OldPassword)); err != nil {
+	if !auth.CheckPasswordHash(req.OldPassword, m.PasswordHash) {
 		return errors.New("contraseña actual incorrecta")
 	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	hash, err := auth.HashPassword(req.NewPassword)
 	if err != nil {
 		return err
 	}
