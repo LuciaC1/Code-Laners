@@ -15,7 +15,7 @@ import (
 )
 
 type UserServiceInterface interface {
-	Register(req dto.RegisterRequest) (string, error)
+	Register(req dto.RegisterRequest) (dto.RegisterRequest, error)
 	Login(req dto.LoginRequest) (dto.User, error)
 	GetUsers(name string) ([]dto.User, error)
 	GetUserByID(id string) (dto.User, error)

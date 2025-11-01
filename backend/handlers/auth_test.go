@@ -17,15 +17,15 @@ import (
 )
 
 type mockUserService struct {
-	registerFn func(req dto.RegisterRequest) (string, error)
+	registerFn func(req dto.RegisterRequest) (dto.RegisterRequest, error)
 	loginFn    func(req dto.LoginRequest) (dto.User, error)
 }
 
-func (m *mockUserService) Register(req dto.RegisterRequest) (string, error) {
+func (m *mockUserService) Register(req dto.RegisterRequest) (dto.RegisterRequest, error) {
 	if m.registerFn != nil {
 		return m.registerFn(req)
 	}
-	return "", nil
+	return dto.RegisterRequest{}, nil
 }
 func (m *mockUserService) Login(req dto.LoginRequest) (dto.User, error) {
 	if m.loginFn != nil {
@@ -71,9 +71,9 @@ func TestRegister_Success(t *testing.T) {
 	}
 
 	msvc := &mockUserService{
-		registerFn: func(req dto.RegisterRequest) (string, error) {
+		registerFn: func(req dto.RegisterRequest) (dto.RegisterRequest, error) {
 
-			return mockedUser.Email, nil
+			return dto.RegisterRequest{Email: mockedUser.Email}, nil
 		},
 	}
 
@@ -94,11 +94,11 @@ func TestRegister_Success(t *testing.T) {
 		t.Fatalf("expected status %d got %d", http.StatusCreated, w.Code)
 	}
 
-	var got string
+	var got dto.RegisterRequest
 	if err := json.Unmarshal(w.Body.Bytes(), &got); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
 	}
-	if got != mockedUser.Email {
+	if got.Email != mockedUser.Email {
 		t.Fatalf("unexpected response: %v", got)
 	}
 }
