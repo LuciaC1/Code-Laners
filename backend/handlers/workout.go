@@ -10,14 +10,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetWorkout(c *gin.Context, workoutService services.WorkoutServiceInterface) {
+type WorkoutHandler struct {
+	service services.WorkoutServiceInterface
+}
+
+func NewWorkoutHandler(s services.WorkoutServiceInterface) *WorkoutHandler {
+	return &WorkoutHandler{service: s}
+}
+
+func (h *WorkoutHandler) GetWorkouts(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
 
-	workouts, err := workoutService.GetWorkouts(userID.(string))
+	workouts, err := h.service.GetWorkouts(userID.(string))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -26,7 +34,7 @@ func GetWorkout(c *gin.Context, workoutService services.WorkoutServiceInterface)
 	c.JSON(http.StatusOK, workouts)
 }
 
-func CreateWorkout(c *gin.Context, workoutService services.WorkoutServiceInterface) {
+func (h *WorkoutHandler) CreateWorkout(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
@@ -43,7 +51,7 @@ func CreateWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 	workout.CompletedAt = time.Now()
 	workout.UpdatedAt = time.Now()
 
-	id, err := workoutService.CreateWorkout(workout)
+	id, err := h.service.CreateWorkout(workout)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -52,7 +60,23 @@ func CreateWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
-func UpdateWorkout(c *gin.Context, workoutService services.WorkoutServiceInterface) {
+func (h *WorkoutHandler) GetWorkoutByID(c *gin.Context) {
+	workoutID := c.Param("id")
+	if workoutID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de workout requerido"})
+		return
+	}
+
+	workout, err := h.service.GetWorkoutByID(workoutID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Workout no encontrado"})
+		return
+	}
+
+	c.JSON(http.StatusOK, workout)
+}
+
+func (h *WorkoutHandler) UpdateWorkout(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
@@ -65,7 +89,7 @@ func UpdateWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 		return
 	}
 
-	existingWorkout, err := workoutService.GetWorkoutByID(workoutID)
+	existingWorkout, err := h.service.GetWorkoutByID(workoutID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Workout no encontrado"})
 		return
@@ -86,7 +110,7 @@ func UpdateWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 	workout.UserID = userID.(string)
 	workout.UpdatedAt = time.Now()
 
-	if err := workoutService.UpdateWorkout(workout); err != nil {
+	if err := h.service.UpdateWorkout(workout); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -94,7 +118,7 @@ func UpdateWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 	c.JSON(http.StatusOK, gin.H{"message": "Workout actualizado exitosamente"})
 }
 
-func DeleteWorkout(c *gin.Context, workoutService services.WorkoutServiceInterface) {
+func (h *WorkoutHandler) DeleteWorkout(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
@@ -107,7 +131,7 @@ func DeleteWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 		return
 	}
 
-	existingWorkout, err := workoutService.GetWorkoutByID(workoutID)
+	existingWorkout, err := h.service.GetWorkoutByID(workoutID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Workout no encontrado"})
 		return
@@ -118,7 +142,7 @@ func DeleteWorkout(c *gin.Context, workoutService services.WorkoutServiceInterfa
 		return
 	}
 
-	if err := workoutService.DeleteWorkout(workoutID); err != nil {
+	if err := h.service.DeleteWorkout(workoutID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

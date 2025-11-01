@@ -1,10 +1,29 @@
 package main
 
-// main.go: Archivo donde solo se manejan las rutas
-// handlers: Funciones que atienden cada ruta.
+import (
+	"backend/database"
+	"backend/routes"
+	"log"
 
-// services: Funciones de lógica de negocio.
-// dto: Archivos con struct de request, response
+	"github.com/gin-gonic/gin"
+)
 
-// repositories: métodos de acceso a datos
-// model: estructuras para mapeos de ORM
+func main() {
+	if err := database.NewMongoDB().Connect(); err != nil {
+		log.Fatal("Error conectando a MongoDB:", err)
+	}
+	defer database.NewMongoDB().Disconnect()
+
+	r := gin.Default()
+
+	r.LoadHTMLGlob("templates/*")
+
+	r.Static("/static", "./static")
+
+	routes.SetupRoutes(r, nil, nil, nil, nil)
+
+	log.Println("Servidor iniciado en http://localhost:8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal("Error iniciando servidor:", err)
+	}
+}
