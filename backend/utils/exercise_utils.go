@@ -8,6 +8,7 @@ import (
 
 func ConvertExerciseModelToDTO(exercise models.Exercise) dto.ExerciseResponse {
 	return dto.ExerciseResponse{
+		ID:          exercise.ID.Hex(),
 		UserID:      exercise.UserID,
 		Name:        exercise.Name,
 		Description: exercise.Description,

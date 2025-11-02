@@ -1,0 +1,59 @@
+{{define "workout-detail"}}
+<div class="container my-5">
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="/workouts" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Entrenamientos
+            </a>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+
+    <div id="workoutContent" class="d-none">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h1 class="card-title">Entrenamiento</h1>
+                        <p class="text-muted" id="workoutDate"></p>
+
+                        <div id="workoutRoutine" class="mb-3 d-none"></div>
+                        <div id="workoutDuration" class="mb-3 d-none"></div>
+                        <div id="workoutCalories" class="mb-3 d-none"></div>
+
+                        <div id="workoutNotes" class="mb-3 d-none">
+                            <h5>Notas</h5>
+                            <p id="notesText"></p>
+                        </div>
+
+                        <div class="mt-4">
+                            <button class="btn btn-primary" onclick="editWorkout()">
+                                <i class="bi bi-pencil"></i> Editar
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteWorkout()">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Información del Entrenamiento</h5>
+                        <ul class="list-unstyled" id="workoutInfo"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorMessage" class="alert alert-danger d-none"></div>
+</div>
+{{end}}
+

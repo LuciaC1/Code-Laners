@@ -1,0 +1,28 @@
+{{define "routines"}}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-list-check"></i> Rutinas</h1>
+            <p class="text-muted">Gestiona tus rutinas de entrenamiento personalizadas</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-outline-primary" onclick="loadRoutines()">
+                <i class="bi bi-arrow-clockwise"></i> Actualizar
+            </button>
+            <a href="/routines/create" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Nueva Rutina
+            </a>
+        </div>
+    </div>
+
+    <!-- Routines Grid -->
+    <div class="row g-4" id="routinesContainer">
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+

@@ -1,0 +1,54 @@
+{{define "exercise-detail"}}
+<div class="container my-5">
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="/exercises" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Ejercicios
+            </a>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+    </div>
+
+    <div id="exerciseContent" class="d-none">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h1 class="card-title" id="exerciseName"></h1>
+                        <div class="mb-3" id="exerciseBadges"></div>
+                        <p class="card-text" id="exerciseDescription"></p>
+                        
+                        <div id="exerciseSteps" class="d-none">
+                            <h4 class="mt-4">Instrucciones</h4>
+                            <ol id="stepsList"></ol>
+                        </div>
+
+                        <div id="exerciseMedia" class="mt-4 d-none">
+                            <img id="exerciseImage" class="img-fluid rounded" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Información del Ejercicio</h5>
+                        <ul class="list-unstyled" id="exerciseInfo"></ul>
+                        <button class="btn btn-primary w-100 mt-3" onclick="addToRoutine()">
+                            <i class="bi bi-plus-circle"></i> Agregar a Rutina
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorMessage" class="alert alert-danger d-none"></div>
+</div>
+{{end}}
+

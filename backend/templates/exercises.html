@@ -1,0 +1,73 @@
+{{define "exercises"}}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="bi bi-barbell"></i> Ejercicios</h1>
+            <p class="text-muted">Explora nuestra biblioteca completa de ejercicios</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <i class="bi bi-funnel"></i> Filtrar
+            </button>
+            <a href="/exercises/create" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Nuevo Ejercicio
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div class="modal fade" id="filterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filtrar Ejercicios</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="filterForm">
+                        <div class="mb-3">
+                            <label for="filterName" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="filterName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="filterCategory" class="form-label">Categoría</label>
+                            <select class="form-select" id="filterCategory">
+                                <option value="">Todas</option>
+                                <option value="strength">Fuerza</option>
+                                <option value="cardio">Cardio</option>
+                                <option value="flexibility">Flexibilidad</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filterMuscleGroup" class="form-label">Grupo Muscular</label>
+                            <select class="form-select" id="filterMuscleGroup">
+                                <option value="">Todos</option>
+                                <option value="chest">Pecho</option>
+                                <option value="back">Espalda</option>
+                                <option value="legs">Piernas</option>
+                                <option value="arms">Brazos</option>
+                                <option value="shoulders">Hombros</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="applyFilters()">Aplicar Filtros</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercises Grid -->
+    <div class="row g-4" id="exercisesContainer">
+        <!-- Exercises will be loaded here via JavaScript -->
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+

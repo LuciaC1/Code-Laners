@@ -1,0 +1,57 @@
+{{define "home"}}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="jumbotron bg-primary text-white rounded p-5 mb-4">
+                <h1 class="display-4"><i class="bi bi-activity"></i> Bienvenido a la App Fitness de Code-Laners</h1>
+                <p class="lead">Gestiona tus ejercicios, rutinas y entrenamientos de manera profesional.</p>
+                <hr class="my-4 bg-white">
+                <p>Comienza tu viaje fitness hoy mismo</p>
+                <a class="btn btn-warning btn-lg" href="/exercises" role="button">
+                    <i class="bi bi-barbell"></i> Explorar Ejercicios
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-barbell display-1 text-primary mb-3"></i>
+                    <h5 class="card-title">Ejercicios</h5>
+                    <p class="card-text">Explora nuestra biblioteca completa de ejercicios con instrucciones detalladas.</p>
+                    <a href="/exercises" class="btn btn-primary">
+                        <i class="bi bi-arrow-right"></i> Ver Ejercicios
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-list-check display-1 text-success mb-3"></i>
+                    <h5 class="card-title">Rutinas</h5>
+                    <p class="card-text">Crea y personaliza rutinas de entrenamiento según tus objetivos.</p>
+                    <a href="/routines" class="btn btn-success">
+                        <i class="bi bi-arrow-right"></i> Ver Rutinas
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check display-1 text-warning mb-3"></i>
+                    <h5 class="card-title">Entrenamientos</h5>
+                    <p class="card-text">Registra y realiza seguimiento de tus sesiones de entrenamiento.</p>
+                    <a href="/workouts" class="btn btn-warning">
+                        <i class="bi bi-arrow-right"></i> Ver Entrenamientos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
