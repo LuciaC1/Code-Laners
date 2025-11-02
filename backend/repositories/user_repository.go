@@ -14,6 +14,7 @@ import (
 type UserRepositoryInterface interface {
 	GetUser(name string) ([]models.User, error)
 	GetUserByID(id string) (models.User, error)
+	GetUserByEmail(email string) (models.User, error)
 	CreateUser(user models.User) (*mongo.InsertOneResult, error)
 	UpdateUser(user models.User) (*mongo.UpdateResult, error)
 	DeleteUser(id primitive.ObjectID) (*mongo.DeleteResult, error)
@@ -67,6 +68,14 @@ func (repository UserRepository) GetUserByID(id string) (models.User, error) {
 	var user models.User
 
 	err = collection.FindOne(context.TODO(), filter).Decode(&user)
+	return user, err
+}
+
+func (repository UserRepository) GetUserByEmail(email string) (models.User, error) {
+	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
+	filter := bson.M{"email": email}
+	var user models.User
+	err := collection.FindOne(context.TODO(), filter).Decode(&user)
 	return user, err
 }
 

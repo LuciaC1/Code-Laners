@@ -12,6 +12,7 @@ import (
 	"backend/repositories"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserServiceInterface interface {
@@ -104,24 +105,17 @@ func (s *UserService) Login(req dto.LoginRequest) (dto.User, error) {
 	if req.Email == "" || req.Password == "" {
 		return dto.User{}, errors.New("credenciales requeridas")
 	}
-	candidates, err := s.repo.GetUser("")
+	found, err := s.repo.GetUserByEmail(req.Email)
 	if err != nil {
-		return dto.User{}, err
-	}
-	var found *models.User
-	for _, u := range candidates {
-		if u.Email == req.Email {
-			found = &u
-			break
+		if err == mongo.ErrNoDocuments {
+			return dto.User{}, errors.New("usuario no encontrado")
 		}
-	}
-	if found == nil {
-		return dto.User{}, errors.New("usuario no encontrado")
+		return dto.User{}, err
 	}
 	if !auth.CheckPasswordHash(req.Password, found.PasswordHash) {
 		return dto.User{}, errors.New("contraseña incorrecta")
 	}
-	userdto := modelUserToDTO(*found)
+	userdto := modelUserToDTO(found)
 	userdto.PasswordHash = ""
 	return userdto, nil
 }
