@@ -1,7 +1,13 @@
 // Exercise detail page functionality
 
+let currentExerciseId = null;
+let currentExercise = null;
+let isAdmin = false;
+
 async function loadExercise() {
     const exerciseId = window.location.pathname.split('/').pop();
+    currentExerciseId = exerciseId;
+    
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/exercises/${exerciseId}`, {
@@ -15,11 +21,46 @@ async function loadExercise() {
         }
 
         const exercise = await response.json();
+        currentExercise = exercise;
+        
+        // Check if user is admin (from token or user data)
+        checkUserRole();
+        
         renderExercise(exercise);
     } catch (error) {
         document.getElementById('loadingSpinner').classList.add('d-none');
         document.getElementById('errorMessage').textContent = error.message || 'Error al cargar el ejercicio';
         document.getElementById('errorMessage').classList.remove('d-none');
+    }
+}
+
+function checkUserRole() {
+    // Try to get user role from localStorage
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            isAdmin = user.role === 'admin';
+            if (isAdmin) {
+                showAdminControls();
+            }
+        } catch (e) {
+            // Ignore parse errors
+        }
+    }
+}
+
+function showAdminControls() {
+    const actionButtons = document.getElementById('exerciseActions');
+    if (actionButtons) {
+        actionButtons.innerHTML = `
+            <button class="btn btn-warning" onclick="editExercise()">
+                <i class="bi bi-pencil"></i> Editar Ejercicio
+            </button>
+            <button class="btn btn-outline-danger" onclick="deleteExercise()">
+                <i class="bi bi-trash"></i> Eliminar Ejercicio
+            </button>
+        `;
     }
 }
 
@@ -58,7 +99,42 @@ function renderExercise(exercise) {
 }
 
 function addToRoutine() {
-    alert('Funcionalidad de agregar a rutina próximamente');
+    if (currentExerciseId) {
+        window.location.href = `/routines/create?exercise_id=${currentExerciseId}`;
+    }
+}
+
+async function editExercise() {
+    if (currentExerciseId) {
+        window.location.href = `/exercises/${currentExerciseId}/edit`;
+    }
+}
+
+async function deleteExercise() {
+    if (!confirm('¿Estás seguro de eliminar este ejercicio? Esta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/exercises/${currentExerciseId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        if (response.ok) {
+            alert('Ejercicio eliminado correctamente');
+            window.location.href = '/exercises';
+        } else {
+            const data = await response.json();
+            alert(data.error || 'Error al eliminar el ejercicio');
+        }
+    } catch (error) {
+        alert('Error al eliminar el ejercicio');
+        console.error('Error:', error);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', loadExercise);

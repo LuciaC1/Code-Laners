@@ -1,0 +1,124 @@
+{{define "stats"}}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="bi bi-graph-up"></i> Mis Estadísticas</h1>
+            <p class="text-muted">Visualiza tu progreso y desempeño</p>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-calendar-check text-primary" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" id="totalWorkouts">0</h3>
+                    <p class="text-muted mb-0">Entrenamientos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-list-check text-success" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" id="totalRoutines">0</h3>
+                    <p class="text-muted mb-0">Rutinas Activas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-clock text-warning" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" id="totalMinutes">0</h3>
+                    <p class="text-muted mb-0">Minutos Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="bi bi-fire text-danger" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" id="totalCalories">0</h3>
+                    <p class="text-muted mb-0">Calorías Quemadas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Frecuencia de Entrenamiento</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="frequencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Rutinas Más Utilizadas</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="routinesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Progreso en el Tiempo</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Workouts -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Entrenamientos Recientes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Rutina</th>
+                                    <th>Duración</th>
+                                    <th>Calorías</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentWorkoutsTable">
+                                <tr>
+                                    <td colspan="5" class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Cargando...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+

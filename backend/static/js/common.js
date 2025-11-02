@@ -13,14 +13,24 @@ function updateAuthSection() {
         // Get user info from localStorage if available
         const userStr = localStorage.getItem('user');
         let userName = 'Usuario';
+        let user = null;
         if (userStr) {
             try {
-                const user = JSON.parse(userStr);
+                user = JSON.parse(userStr);
                 userName = user.name || 'Usuario';
             } catch (e) {
                 // Ignore parse errors
             }
         }
+
+        // Check if user is admin
+        const isAdmin = user && user.role === 'admin';
+        const adminMenu = isAdmin ? `
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/admin">
+                <i class="bi bi-speedometer2 me-2"></i>Panel Admin
+            </a></li>
+        ` : '';
 
         authSection.innerHTML = `
             <li class="nav-item dropdown">
@@ -32,6 +42,10 @@ function updateAuthSection() {
                     <li><a class="dropdown-item" href="/profile">
                         <i class="bi bi-person me-2"></i>Perfil
                     </a></li>
+                    <li><a class="dropdown-item" href="/stats">
+                        <i class="bi bi-graph-up me-2"></i>Estadísticas
+                    </a></li>
+                    ${adminMenu}
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
                         <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
@@ -39,6 +53,13 @@ function updateAuthSection() {
                 </ul>
             </li>
         `;
+        
+        // Also update server-side menu if it exists
+        const serverMenu = document.getElementById('userMenu');
+        if (serverMenu && isAdmin) {
+            const adminLinks = serverMenu.querySelectorAll('#adminMenuLink');
+            adminLinks.forEach(link => link.style.display = '');
+        }
     } else {
         // User is not logged in
         authSection.innerHTML = `

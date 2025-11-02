@@ -48,9 +48,12 @@ function renderRoutines(routines) {
                 </div>
                 <div class="card-footer bg-transparent">
                     <a href="/routines/${routine.id}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-eye"></i> Ver Detalles
+                        <i class="bi bi-eye"></i> Ver
                     </a>
-                    <button class="btn btn-outline-danger btn-sm" onclick="deleteRoutine('${routine.id}')">
+                    <button class="btn btn-outline-success btn-sm" onclick="duplicateRoutine('${routine.id}')" title="Duplicar rutina">
+                        <i class="bi bi-files"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteRoutine('${routine.id}')" title="Eliminar rutina">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -79,6 +82,57 @@ async function deleteRoutine(id) {
         }
     } catch (error) {
         alert('Error al eliminar la rutina');
+    }
+}
+
+async function duplicateRoutine(id) {
+    if (!confirm('¿Deseas duplicar esta rutina?')) return;
+
+    try {
+        const token = localStorage.getItem('token');
+        
+        // First, get the routine to duplicate
+        const getResponse = await fetch(`/api/routines/${id}`, {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        if (!getResponse.ok) {
+            alert('Error al obtener la rutina');
+            return;
+        }
+
+        const routine = await getResponse.json();
+        
+        // Create a new routine with the same data but new name
+        const newRoutine = {
+            name: `${routine.name} (Copia)`,
+            description: routine.description || '',
+            exercises: routine.exercises || [],
+            is_public: false
+        };
+
+        const createResponse = await fetch('/api/routines', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newRoutine)
+        });
+
+        if (createResponse.ok) {
+            const newRoutineData = await createResponse.json();
+            alert('Rutina duplicada correctamente');
+            window.location.href = `/routines/${newRoutineData.id || newRoutineData.routine?.id}`;
+        } else {
+            const error = await createResponse.json();
+            alert(error.error || 'Error al duplicar la rutina');
+        }
+    } catch (error) {
+        alert('Error al duplicar la rutina');
+        console.error('Error:', error);
     }
 }
 

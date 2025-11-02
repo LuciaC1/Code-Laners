@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"backend/dto"
-	"backend/middleware"
 	"backend/services"
 	"net/http"
 
@@ -50,10 +49,7 @@ func (h *ExerciseHandler) CreateExercise(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
-	middleware.RequireRole("admin")(c)
-	if c.IsAborted() {
-		return
-	}
+	// El middleware RequireRole("admin") en las rutas ya verifica el rol
 	var exerciseReq dto.ExerciseRequest
 	if err := c.ShouldBindJSON(&exerciseReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -75,10 +71,7 @@ func (h *ExerciseHandler) UpdateExercise(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
-	middleware.RequireRole("admin")(c)
-	if c.IsAborted() {
-		return
-	}
+	// El middleware RequireRole("admin") en las rutas ya verifica el rol
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing exercise ID"})
@@ -105,10 +98,7 @@ func (h *ExerciseHandler) DeleteExercise(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
-	middleware.RequireRole("admin")(c)
-	if c.IsAborted() {
-		return
-	}
+	// El middleware RequireRole("admin") en las rutas ya verifica el rol
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing exercise ID"})

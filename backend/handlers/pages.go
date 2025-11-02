@@ -92,3 +92,31 @@ func ProfilePage(c *gin.Context) {
 		"Title":        "Mi Perfil",
 	})
 }
+
+func StatsPage(c *gin.Context) {
+	c.HTML(200, "layout", gin.H{
+		"TemplateName": "stats",
+		"Title":        "Mis Estadísticas",
+	})
+}
+
+func AdminDashboardPage(c *gin.Context) {
+	c.HTML(200, "layout", gin.H{
+		"TemplateName": "admin-dashboard",
+		"Title":        "Panel de Administración",
+	})
+}
+
+func AdminUsersPage(c *gin.Context) {
+	c.HTML(200, "layout", gin.H{
+		"TemplateName": "admin-users",
+		"Title":        "Gestión de Usuarios",
+	})
+}
+
+func AdminLogsPage(c *gin.Context) {
+	c.HTML(200, "layout", gin.H{
+		"TemplateName": "admin-logs",
+		"Title":        "Logs del Sistema",
+	})
+}

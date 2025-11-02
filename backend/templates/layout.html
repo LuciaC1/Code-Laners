@@ -43,10 +43,13 @@
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> {{.User.Name}}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end" id="userMenu">
                             <li><a class="dropdown-item" href="/profile"><i class="bi bi-person"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="/stats"><i class="bi bi-graph-up"></i> Estadísticas</a></li>
+                            <li id="adminMenuLink" style="display: none;"><hr class="dropdown-divider"></li>
+                            <li id="adminMenuLink" style="display: none;"><a class="dropdown-item" href="/admin"><i class="bi bi-speedometer2"></i> Panel Admin</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout(); return false;"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
                         </ul>
                     </li>
                     {{else}}
@@ -90,6 +93,14 @@
             {{template "workout-create" .}}
         {{else if eq .TemplateName "profile"}}
             {{template "profile" .}}
+        {{else if eq .TemplateName "stats"}}
+            {{template "stats" .}}
+        {{else if eq .TemplateName "admin-dashboard"}}
+            {{template "admin-dashboard" .}}
+        {{else if eq .TemplateName "admin-users"}}
+            {{template "admin-users" .}}
+        {{else if eq .TemplateName "admin-logs"}}
+            {{template "admin-logs" .}}
         {{end}}
     </main>
 
@@ -128,6 +139,14 @@
         <script src="/static/js/workout-create.js"></script>
     {{else if eq .TemplateName "profile"}}
         <script src="/static/js/profile.js"></script>
+    {{else if eq .TemplateName "stats"}}
+        <script src="/static/js/stats.js"></script>
+    {{else if eq .TemplateName "admin-dashboard"}}
+        <script src="/static/js/admin-dashboard.js"></script>
+    {{else if eq .TemplateName "admin-users"}}
+        <script src="/static/js/admin-users.js"></script>
+    {{else if eq .TemplateName "admin-logs"}}
+        <script src="/static/js/admin-logs.js"></script>
     {{end}}
 </body>
 </html>
