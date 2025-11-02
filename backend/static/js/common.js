@@ -17,10 +17,6 @@ function updateAuthSection() {
                     Usuario
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/products">
-                        <i class="bi bi-list-ul me-2"></i>Mis Productos
-                    </a></li>
-                    <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
                         <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
                     </a></li>
