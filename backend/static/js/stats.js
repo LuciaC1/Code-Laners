@@ -21,6 +21,14 @@ async function loadStatistics() {
             headers: headers
         });
         
+        if (!workoutsResponse.ok) {
+            if (workoutsResponse.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            throw new Error(`Error al cargar entrenamientos: ${workoutsResponse.status}`);
+        }
+        
         const workoutsData = await workoutsResponse.json();
         const workouts = workoutsData.workouts || [];
 
@@ -28,6 +36,14 @@ async function loadStatistics() {
         const routinesResponse = await fetch('/api/routines', {
             headers: headers
         });
+        
+        if (!routinesResponse.ok) {
+            if (routinesResponse.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            throw new Error(`Error al cargar rutinas: ${routinesResponse.status}`);
+        }
         
         const routinesData = await routinesResponse.json();
         const routines = routinesData.routines || [];
@@ -46,6 +62,11 @@ async function loadStatistics() {
         }
     } catch (error) {
         console.error('Error loading statistics:', error);
+        // Show error message to user
+        const tbody = document.getElementById('recentWorkoutsTable');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error al cargar estadísticas: ${error.message}</td></tr>`;
+        }
     }
 }
 
@@ -101,6 +122,7 @@ function renderFrequencyChart(workouts) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -142,7 +164,8 @@ function renderRoutinesChart(workouts) {
             }]
         },
         options: {
-            responsive: true
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
 }

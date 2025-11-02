@@ -10,6 +10,7 @@ type WorkoutDTO struct {
 	ID                primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	UserID            string             `bson:"user_id" json:"user_id"`
 	RoutineID         string             `bson:"routine_id,omitempty" json:"routine_id,omitempty"`
+	RoutineName       string             `bson:"routine_name,omitempty" json:"routine_name,omitempty"`
 	CompletedAt       time.Time          `bson:"completed_at" json:"completed_at"`
 	UpdatedAt         time.Time          `bson:"updated_at" json:"updated_at"`
 	DurationMinutes   int                `bson:"duration_minutes,omitempty" json:"duration_minutes,omitempty"`

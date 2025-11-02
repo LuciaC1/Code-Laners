@@ -25,12 +25,14 @@ type RoutineServiceInterface interface {
 type RoutineService struct {
 	repo         repositories.RoutineRepositoryInterface
 	exerciseRepo repositories.ExerciseRepositoryInterface
+	userRepo     repositories.UserRepositoryInterface
 }
 
-func NewRoutineService(repo repositories.RoutineRepositoryInterface, exerciseRepo repositories.ExerciseRepositoryInterface) *RoutineService {
+func NewRoutineService(repo repositories.RoutineRepositoryInterface, exerciseRepo repositories.ExerciseRepositoryInterface, userRepo repositories.UserRepositoryInterface) *RoutineService {
 	return &RoutineService{
 		repo:         repo,
 		exerciseRepo: exerciseRepo,
+		userRepo:     userRepo,
 	}
 }
 
@@ -304,9 +306,19 @@ func (s *RoutineService) convertModelToDTOWithExerciseNames(routine models.Routi
 			Weight:       entry.Weight,
 		}
 	}
+	// Get owner name
+	ownerName := ""
+	if s.userRepo != nil && !routine.OwnerID.IsZero() {
+		user, err := s.userRepo.GetUserByID(routine.OwnerID.Hex())
+		if err == nil && !user.ID.IsZero() {
+			ownerName = user.Name
+		}
+	}
+	
 	return dto.RoutineResponse{
 		ID:          routine.ID.Hex(),
 		UserID:      routine.OwnerID.Hex(),
+		OwnerName:   ownerName,
 		Name:        routine.Name,
 		Excercises:  entries,
 		Description: routine.Description,

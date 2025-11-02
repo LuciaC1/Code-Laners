@@ -28,8 +28,8 @@ func main() {
 		r,
 		handlers.NewUserHandler(services.NewUserService(repositories.NewUserRepository(db))),
 		handlers.NewExerciseHandler(services.NewExerciseService(repositories.NewExerciseRepository(db))),
-		handlers.NewRoutineHandler(services.NewRoutineService(repositories.NewRoutineRepository(db), repositories.NewExerciseRepository(db))),
-		handlers.NewWorkoutHandler(services.NewWorkoutService(repositories.NewWorkoutRepository(db))),
+		handlers.NewRoutineHandler(services.NewRoutineService(repositories.NewRoutineRepository(db), repositories.NewExerciseRepository(db), repositories.NewUserRepository(db))),
+		handlers.NewWorkoutHandler(services.NewWorkoutService(repositories.NewWorkoutRepository(db), repositories.NewRoutineRepository(db))),
 	)
 
 	log.Println("Servidor iniciado en http://localhost:8080")

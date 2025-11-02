@@ -11,6 +11,7 @@ type RoutineRequest struct {
 type RoutineResponse struct {
 	ID          string                 `json:"id"`
 	UserID      string                 `json:"user_id"`
+	OwnerName   string                 `json:"owner_name,omitempty"`
 	Name        string                 `json:"name" binding:"required"`
 	Excercises  []RoutineExcerciseList `json:"exercises" binding:"required"`
 	Description string                 `json:"description,omitempty"`

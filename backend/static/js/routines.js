@@ -21,11 +21,23 @@ function renderRoutines(routines) {
     const container = document.getElementById('routinesContainer');
     container.innerHTML = '';
     
+    // Get current user ID
+    const userStr = localStorage.getItem('user');
+    let currentUserId = null;
+    if (userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            currentUserId = user.id || user._id;
+        } catch (e) {
+            console.error('Error parsing user:', e);
+        }
+    }
+    
     if (routines.length === 0) {
         container.innerHTML = `
             <div class="col-12">
                 <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> No tienes rutinas creadas. 
+                    <i class="bi bi-info-circle"></i> No hay rutinas disponibles. 
                     <a href="/routines/create">Crea tu primera rutina</a>
                 </div>
             </div>
@@ -34,6 +46,7 @@ function renderRoutines(routines) {
     }
 
     routines.forEach(routine => {
+        const isOwner = currentUserId && routine.user_id === currentUserId;
         const card = document.createElement('div');
         card.className = 'col-md-6 col-lg-4';
         card.innerHTML = `
@@ -45,17 +58,24 @@ function renderRoutines(routines) {
                         <span class="badge bg-primary">${routine.exercises?.length || 0} ejercicios</span>
                         ${routine.is_public ? '<span class="badge bg-success">Pública</span>' : '<span class="badge bg-secondary">Privada</span>'}
                     </div>
+                    ${routine.owner_name && !isOwner ? `<small class="text-muted"><i class="bi bi-person"></i> Creada por: ${routine.owner_name}</small>` : ''}
                 </div>
                 <div class="card-footer bg-transparent">
                     <a href="/routines/${routine.id}" class="btn btn-primary btn-sm">
                         <i class="bi bi-eye"></i> Ver
                     </a>
-                    <button class="btn btn-outline-success btn-sm" onclick="duplicateRoutine('${routine.id}')" title="Duplicar rutina">
-                        <i class="bi bi-files"></i>
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="deleteRoutine('${routine.id}')" title="Eliminar rutina">
-                        <i class="bi bi-trash"></i>
-                    </button>
+                    ${isOwner ? `
+                        <button class="btn btn-outline-success btn-sm" onclick="duplicateRoutine('${routine.id}')" title="Duplicar rutina">
+                            <i class="bi bi-files"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deleteRoutine('${routine.id}')" title="Eliminar rutina">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    ` : `
+                        <button class="btn btn-outline-success btn-sm" onclick="duplicateRoutine('${routine.id}')" title="Duplicar rutina">
+                            <i class="bi bi-files"></i> Duplicar
+                        </button>
+                    `}
                 </div>
             </div>
         `;

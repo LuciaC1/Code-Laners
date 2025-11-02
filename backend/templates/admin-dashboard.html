@@ -21,7 +21,7 @@
         <div class="col-md-3">
             <div class="card text-center shadow-sm border-success">
                 <div class="card-body">
-                    <i class="bi bi-barbell text-success" style="font-size: 2.5rem;"></i>
+                    <i class="bi bi-bicycle  text-success" style="font-size: 2.5rem;"></i>
                     <h3 class="mt-2" id="totalExercises">0</h3>
                     <p class="text-muted mb-0">Ejercicios Totales</p>
                 </div>
@@ -50,22 +50,26 @@
     <!-- Charts Row -->
     <div class="row g-4 mb-4">
         <div class="col-lg-6">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Usuarios por Mes</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="usersChart"></canvas>
+                    <div style="height: 300px;">
+                        <canvas id="usersChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Ejercicios Más Populares</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="popularExercisesChart"></canvas>
+                    <div style="height: 300px;">
+                        <canvas id="popularExercisesChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -74,7 +78,7 @@
     <!-- Popular Routines and Recent Activity -->
     <div class="row g-4">
         <div class="col-lg-6">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm h-100">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0"><i class="bi bi-star"></i> Rutinas Más Utilizadas</h5>
                 </div>

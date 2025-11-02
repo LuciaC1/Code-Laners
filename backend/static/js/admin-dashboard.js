@@ -100,6 +100,7 @@ function renderUsersChart(users) {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
@@ -148,7 +149,8 @@ function renderPopularExercisesChart(exercises, workouts) {
             }]
         },
         options: {
-            responsive: true
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
 }

@@ -22,6 +22,7 @@ type UserServiceInterface interface {
 	GetUserByID(id string) (dto.User, error)
 	UpdateUser(id string, req dto.UpdateUserRequest) error
 	ChangePassword(id string, req dto.ChangePasswordRequest) error
+	UpdateUserRole(id string, role string) error
 	DeleteUser(id string) error
 }
 
@@ -148,16 +149,18 @@ func (s *UserService) UpdateUser(id string, req dto.UpdateUserRequest) error {
 	if req.Email != "" && !isValidEmail(req.Email) {
 		return errors.New("email inválido")
 	}
+
+	// Update fields only if they are provided
 	if req.Name != "" {
 		m.Name = req.Name
 	}
 	if req.Email != "" {
 		m.Email = req.Email
 	}
-	if req.Weight != 0 {
+	if req.Weight > 0 {
 		m.Weight = req.Weight
 	}
-	if req.Height != 0 {
+	if req.Height > 0 {
 		m.Height = req.Height
 	}
 	if req.Level != "" {
@@ -197,6 +200,22 @@ func (s *UserService) ChangePassword(id string, req dto.ChangePasswordRequest) e
 	if err == nil {
 		_, _ = refreshRepo.RevokeAllForUser(objID)
 	}
+	return err
+}
+
+func (s *UserService) UpdateUserRole(id string, role string) error {
+	if role != "admin" && role != "user" {
+		return errors.New("rol inválido. Debe ser 'admin' o 'user'")
+	}
+
+	m, err := s.repo.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	m.Role = models.Role(role)
+	m.UpdatedAt = time.Now()
+	_, err = s.repo.UpdateUser(m)
 	return err
 }
 

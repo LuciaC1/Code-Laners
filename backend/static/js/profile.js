@@ -136,9 +136,11 @@ async function updatePersonalInfo() {
     };
 
     try {
+        const headers = getApiHeaders();
+        headers['Content-Type'] = 'application/json';
         const response = await fetch('/api/me', {
             method: 'PUT',
-            headers: getApiHeaders(),
+            headers: headers,
             body: JSON.stringify(requestData)
         });
 
@@ -178,9 +180,11 @@ async function updatePhysicalData() {
     }
 
     try {
+        const headers = getApiHeaders();
+        headers['Content-Type'] = 'application/json';
         const response = await fetch('/api/me', {
             method: 'PUT',
-            headers: getApiHeaders(),
+            headers: headers,
             body: JSON.stringify(requestData)
         });
 
@@ -210,9 +214,11 @@ async function updateGoals() {
     };
 
     try {
+        const headers = getApiHeaders();
+        headers['Content-Type'] = 'application/json';
         const response = await fetch('/api/me', {
             method: 'PUT',
-            headers: getApiHeaders(),
+            headers: headers,
             body: JSON.stringify(requestData)
         });
 

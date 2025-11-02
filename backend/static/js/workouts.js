@@ -9,7 +9,7 @@ async function loadWorkouts() {
             }
         });
         const data = await response.json();
-        renderWorkouts(data || []);
+        renderWorkouts(data.workouts || []);
     } catch (error) {
         console.error('Error loading workouts:', error);
         document.getElementById('workoutsContainer').innerHTML = 

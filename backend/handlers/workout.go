@@ -31,7 +31,7 @@ func (h *WorkoutHandler) GetWorkouts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, workouts)
+	c.JSON(http.StatusOK, gin.H{"workouts": workouts})
 }
 
 func (h *WorkoutHandler) CreateWorkout(c *gin.Context) {

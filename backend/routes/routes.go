@@ -86,13 +86,9 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 			// Obtener usuario por ID (usa el handler existente)
 			adminAPI.GET("/users/:id", userHandler.GetUserByID)
 
-			// Placeholders para endpoints que requieren handlers adicionales
-			adminAPI.GET("/users", func(c *gin.Context) {
-				c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint not implemented. Use /api/users/:id"})
-			})
-			adminAPI.PUT("/users/:id/role", func(c *gin.Context) {
-				c.JSON(http.StatusNotImplemented, gin.H{"error": "Handler not implemented yet"})
-			})
+			// Get all users (with optional name filter)
+			adminAPI.GET("/users", userHandler.GetAllUsers)
+			adminAPI.PUT("/users/:id/role", userHandler.UpdateUserRole)
 			adminAPI.GET("/logs", func(c *gin.Context) {
 				c.JSON(http.StatusNotImplemented, gin.H{"error": "Handler not implemented yet", "logs": []interface{}{}})
 			})

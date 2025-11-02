@@ -20,11 +20,15 @@ type WorkoutServiceInterface interface {
 }
 
 type WorkoutService struct {
-	repo repositories.WorkoutRepositoryInterface
+	repo         repositories.WorkoutRepositoryInterface
+	routineRepo  repositories.RoutineRepositoryInterface
 }
 
-func NewWorkoutService(repo repositories.WorkoutRepositoryInterface) *WorkoutService {
-	return &WorkoutService{repo: repo}
+func NewWorkoutService(repo repositories.WorkoutRepositoryInterface, routineRepo repositories.RoutineRepositoryInterface) *WorkoutService {
+	return &WorkoutService{
+		repo:        repo,
+		routineRepo: routineRepo,
+	}
 }
 
 func (s *WorkoutService) GetWorkouts(userID string) ([]dto.WorkoutDTO, error) {
@@ -41,7 +45,7 @@ func (s *WorkoutService) GetWorkouts(userID string) ([]dto.WorkoutDTO, error) {
 	}
 	var dtos []dto.WorkoutDTO
 	for _, m := range modelsList {
-		dtos = append(dtos, modelToDTO(m))
+		dtos = append(dtos, s.modelToDTO(m))
 	}
 	return dtos, nil
 }
@@ -51,7 +55,7 @@ func (s *WorkoutService) GetWorkoutByID(id string) (dto.WorkoutDTO, error) {
 	if err != nil {
 		return dto.WorkoutDTO{}, err
 	}
-	return modelToDTO(m), nil
+	return s.modelToDTO(m), nil
 }
 
 func (s *WorkoutService) CreateWorkout(input dto.WorkoutDTO) (string, error) {
@@ -142,7 +146,7 @@ func (s *WorkoutService) DeleteWorkout(id string) error {
 	return err
 }
 
-func modelToDTO(m models.Workout) dto.WorkoutDTO {
+func (s *WorkoutService) modelToDTO(m models.Workout) dto.WorkoutDTO {
 	var uidHex string
 	if !m.UserID.IsZero() {
 		uidHex = m.UserID.Hex()
@@ -151,10 +155,21 @@ func modelToDTO(m models.Workout) dto.WorkoutDTO {
 	if !m.RoutineID.IsZero() {
 		ridHex = m.RoutineID.Hex()
 	}
+	
+	// Get routine name if routine ID exists
+	routineName := ""
+	if s.routineRepo != nil && !m.RoutineID.IsZero() {
+		routine, err := s.routineRepo.GetRoutineByID(ridHex)
+		if err == nil {
+			routineName = routine.Name
+		}
+	}
+	
 	return dto.WorkoutDTO{
 		ID:                m.ID,
 		UserID:            uidHex,
 		RoutineID:         ridHex,
+		RoutineName:       routineName,
 		CompletedAt:       m.CompletedAt,
 		UpdatedAt:         m.UpdatedAt,
 		DurationMinutes:   m.DurationMinutes,

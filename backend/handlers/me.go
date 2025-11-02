@@ -99,3 +99,44 @@ func (handler *UserHandler) ChangePassword(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Contraseña actualizada correctamente"})
 }
+
+func (handler *UserHandler) GetAllUsers(c *gin.Context) {
+	// Get optional name filter from query
+	name := c.Query("name")
+
+	users, err := handler.service.GetUsers(name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Remove password hash from all users before sending
+	for i := range users {
+		users[i].PasswordHash = ""
+	}
+
+	c.JSON(http.StatusOK, gin.H{"users": users})
+}
+
+func (handler *UserHandler) UpdateUserRole(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuario requerido"})
+		return
+	}
+
+	var req struct {
+		Role string `json:"role" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := handler.service.UpdateUserRole(id, req.Role); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Rol actualizado correctamente"})
+}

@@ -33,10 +33,31 @@ function renderRoutine(routine) {
     document.getElementById('routineName').textContent = routine.name || 'Sin nombre';
     document.getElementById('routineDescription').textContent = routine.description || 'Sin descripción';
 
+    // Get current user ID
+    const userStr = localStorage.getItem('user');
+    let currentUserId = null;
+    if (userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            currentUserId = user.id || user._id;
+        } catch (e) {
+            console.error('Error parsing user:', e);
+        }
+    }
+    
+    const isOwner = currentUserId && routine.user_id === currentUserId;
+
     const badges = document.getElementById('routineBadges');
-    badges.innerHTML = routine.is_public 
+    let badgeHTML = routine.is_public 
         ? '<span class="badge bg-success fs-6">Rutina Pública</span>'
         : '<span class="badge bg-secondary fs-6">Rutina Privada</span>';
+    
+    // Show owner name if it's a public routine and user is not the owner
+    if (routine.owner_name && !isOwner) {
+        badgeHTML += ` <small class="text-muted ms-2"><i class="bi bi-person"></i> Creada por: ${routine.owner_name}</small>`;
+    }
+    
+    badges.innerHTML = badgeHTML;
 
     const tbody = document.getElementById('exercisesTableBody');
     tbody.innerHTML = '';
@@ -66,6 +87,16 @@ function renderRoutine(routine) {
         <li class="mb-2"><strong>Total de Series:</strong> ${totalSets}</li>
         <li class="mb-2"><strong>Tiempo Estimado:</strong> ${estimatedTime} min</li>
     `;
+    
+    // Show/hide edit and delete buttons based on ownership
+    const editBtn = document.querySelector('button[onclick*="editRoutine"]');
+    const deleteBtn = document.querySelector('button[onclick*="deleteRoutine"]');
+    if (editBtn) {
+        editBtn.style.display = isOwner ? '' : 'none';
+    }
+    if (deleteBtn) {
+        deleteBtn.style.display = isOwner ? '' : 'none';
+    }
 }
 
 function startWorkout() {

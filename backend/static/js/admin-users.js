@@ -1,5 +1,7 @@
 // Admin users management functionality
 
+let allUsers = []; // Store all users for filtering
+
 document.addEventListener('DOMContentLoaded', function() {
     if (!requireAuth()) {
         return;
@@ -7,6 +9,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
     checkAdminAccess();
     loadUsers();
+    
+    // Filter by name on input (with debounce)
+    let nameFilterTimeout;
+    const nameInput = document.getElementById('filterUserName');
+    if (nameInput) {
+        nameInput.addEventListener('input', function() {
+            clearTimeout(nameFilterTimeout);
+            nameFilterTimeout = setTimeout(() => {
+                loadUsers(); // Reload with name filter
+            }, 500); // Wait 500ms after user stops typing
+        });
+    }
+    
+    // Filter by role on change
+    const roleSelect = document.getElementById('filterUserRole');
+    if (roleSelect) {
+        roleSelect.addEventListener('change', function() {
+            applyFilters(); // Just apply client-side filter
+        });
+    }
 });
 
 async function checkAdminAccess() {
@@ -20,7 +42,14 @@ async function checkAdminAccess() {
 async function loadUsers() {
     try {
         const headers = getApiHeaders();
-        const response = await fetch('/api/admin/users', {
+        
+        // Get name filter from input (for server-side filtering)
+        const nameFilter = document.getElementById('filterUserName')?.value || '';
+        const url = nameFilter 
+            ? `/api/admin/users?name=${encodeURIComponent(nameFilter)}`
+            : '/api/admin/users';
+        
+        const response = await fetch(url, {
             headers: headers
         });
 
@@ -29,8 +58,8 @@ async function loadUsers() {
         }
 
         const data = await response.json();
-        const users = data.users || [];
-        renderUsers(users);
+        allUsers = data.users || [];
+        applyFilters(); // Apply client-side filters
     } catch (error) {
         console.error('Error loading users:', error);
         const tbody = document.getElementById('usersTableBody');
@@ -61,8 +90,14 @@ function renderUsers(users) {
             ? '<span class="badge bg-danger">Administrador</span>'
             : '<span class="badge bg-primary">Usuario</span>';
 
-        const userId = user.id || user._id || 'N/A';
-        const shortId = userId.length > 10 ? userId.substring(0, 10) + '...' : userId;
+        // Handle ID - can be ObjectID object or string
+        let userId = 'N/A';
+        if (user.id) {
+            userId = typeof user.id === 'string' ? user.id : (user.id.$oid || user.id.toString());
+        } else if (user._id) {
+            userId = typeof user._id === 'string' ? user._id : (user._id.$oid || user._id.toString());
+        }
+        const shortId = userId !== 'N/A' && userId.length > 10 ? userId.substring(0, 10) + '...' : userId;
 
         return `
             <tr>
@@ -90,7 +125,7 @@ function renderUsers(users) {
 async function showUserDetails(userId) {
     try {
         const headers = getApiHeaders();
-        const response = await fetch(`/api/users/${userId}`, {
+        const response = await fetch(`/api/admin/users/${userId}`, {
             headers: headers
         });
 
@@ -182,11 +217,17 @@ async function toggleUserRole(userId, currentRole) {
 }
 
 function applyFilters() {
-    const name = document.getElementById('filterUserName').value;
-    const role = document.getElementById('filterUserRole').value;
+    const role = document.getElementById('filterUserRole')?.value || '';
     
-    // For now, reload all users and filter client-side
-    // In a real implementation, you'd send filters to the server
-    loadUsers();
+    // Filter users client-side by role
+    let filteredUsers = [...allUsers];
+    
+    // Apply role filter
+    if (role) {
+        filteredUsers = filteredUsers.filter(user => user.role === role);
+    }
+    
+    // Render filtered users
+    renderUsers(filteredUsers);
 }
 

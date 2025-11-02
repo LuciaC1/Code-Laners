@@ -89,20 +89,34 @@ func (repository UserRepository) UpdateUser(user models.User) (*mongo.UpdateResu
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
 
 	filter := bson.M{"_id": user.ID}
-	update := bson.M{"$set": bson.M{
-		"name":             user.Name,
-		"email":            user.Email,
-		"password_hash":    user.PasswordHash,
-		"role":             user.Role,
-		"date_of_birth":    user.DateOfBirth,
-		"weight,omitempty": user.Weight,
-		"height,omitempty": user.Height,
-		"level,omitempty":  user.Level,
-		"goals,omitempty":  user.Goals,
-		"created_at":       user.CreatedAt,
-		"updated_at":       user.UpdatedAt,
-	}}
+	setFields := bson.M{
+		"name":          user.Name,
+		"email":         user.Email,
+		"role":          user.Role,
+		"date_of_birth": user.DateOfBirth,
+		"updated_at":    user.UpdatedAt,
+	}
 
+	// Only update password_hash if it's not empty (to preserve existing password when updating other fields)
+	if user.PasswordHash != "" {
+		setFields["password_hash"] = user.PasswordHash
+	}
+
+	// Only include optional fields if they have values
+	if user.Weight != 0 {
+		setFields["weight"] = user.Weight
+	}
+	if user.Height != 0 {
+		setFields["height"] = user.Height
+	}
+	if user.Level != "" {
+		setFields["level"] = user.Level
+	}
+	if user.Goals != nil {
+		setFields["goals"] = user.Goals
+	}
+
+	update := bson.M{"$set": setFields}
 	result, err := collection.UpdateOne(context.TODO(), filter, update)
 	return result, err
 }
