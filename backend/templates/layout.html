@@ -79,6 +79,8 @@
             {{template "exercise-detail" .}}
         {{else if eq .TemplateName "exercise-create"}}
             {{template "exercise-create" .}}
+        {{else if eq .TemplateName "exercise-edit"}}
+            {{template "exercise-edit" .}}
         {{else if eq .TemplateName "routines"}}
             {{template "routines" .}}
         {{else if eq .TemplateName "routine-detail"}}
@@ -125,6 +127,8 @@
         <script src="/static/js/exercise-detail.js"></script>
     {{else if eq .TemplateName "exercise-create"}}
         <script src="/static/js/exercise-create.js"></script>
+    {{else if eq .TemplateName "exercise-edit"}}
+        <script src="/static/js/exercise-edit.js"></script>
     {{else if eq .TemplateName "routines"}}
         <script src="/static/js/routines.js"></script>
     {{else if eq .TemplateName "routine-detail"}}

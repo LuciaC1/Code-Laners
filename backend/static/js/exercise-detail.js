@@ -92,10 +92,125 @@ function renderExercise(exercise) {
     }
 
     if (exercise.media_url) {
-        document.getElementById('exerciseImage').src = exercise.media_url;
-        document.getElementById('exerciseImage').alt = exercise.name;
-        document.getElementById('exerciseMedia').classList.remove('d-none');
+        renderMedia(exercise.media_url, exercise.name);
     }
+}
+
+function isVideoUrl(url) {
+    if (!url) return false;
+    
+    // Check for video file extensions
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+    const urlLower = url.toLowerCase();
+    
+    // Check file extension
+    if (videoExtensions.some(ext => urlLower.includes(ext))) {
+        return true;
+    }
+    
+    // Check for YouTube URLs
+    if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+        return true;
+    }
+    
+    // Check for Vimeo URLs
+    if (urlLower.includes('vimeo.com')) {
+        return true;
+    }
+    
+    return false;
+}
+
+function getYouTubeEmbedUrl(url) {
+    let videoId = '';
+    
+    // Handle youtu.be short URLs
+    if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+    }
+    // Handle youtube.com URLs
+    else if (url.includes('youtube.com')) {
+        if (url.includes('v=')) {
+            videoId = url.split('v=')[1].split('&')[0];
+        } else if (url.includes('/embed/')) {
+            videoId = url.split('/embed/')[1].split('?')[0];
+        }
+    }
+    
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+}
+
+function getVimeoEmbedUrl(url) {
+    // Extract Vimeo video ID
+    const match = url.match(/(?:vimeo\.com\/)(\d+)/);
+    return match ? `https://player.vimeo.com/video/${match[1]}` : null;
+}
+
+function renderMedia(mediaUrl, exerciseName) {
+    const mediaContainer = document.getElementById('exerciseMedia');
+    const imageContainer = document.getElementById('exerciseImageContainer');
+    const videoContainer = document.getElementById('exerciseVideoContainer');
+    
+    // Clear previous content
+    imageContainer.innerHTML = '';
+    videoContainer.innerHTML = '';
+    
+    if (isVideoUrl(mediaUrl)) {
+        // Handle YouTube
+        const youtubeEmbed = getYouTubeEmbedUrl(mediaUrl);
+        if (youtubeEmbed) {
+            videoContainer.innerHTML = `
+                <div class="ratio ratio-16x9">
+                    <iframe 
+                        src="${youtubeEmbed}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                        title="${exerciseName || 'Video del ejercicio'}">
+                    </iframe>
+                </div>
+            `;
+        }
+        // Handle Vimeo
+        else if (mediaUrl.includes('vimeo.com')) {
+            const vimeoEmbed = getVimeoEmbedUrl(mediaUrl);
+            if (vimeoEmbed) {
+                videoContainer.innerHTML = `
+                    <div class="ratio ratio-16x9">
+                        <iframe 
+                            src="${vimeoEmbed}" 
+                            frameborder="0" 
+                            allow="autoplay; fullscreen; picture-in-picture" 
+                            allowfullscreen
+                            title="${exerciseName || 'Video del ejercicio'}">
+                        </iframe>
+                    </div>
+                `;
+            }
+        }
+        // Handle direct video files
+        else {
+            videoContainer.innerHTML = `
+                <video class="w-100 rounded" controls>
+                    <source src="${mediaUrl}" type="video/mp4">
+                    <source src="${mediaUrl}" type="video/webm">
+                    <source src="${mediaUrl}" type="video/ogg">
+                    Tu navegador no soporta la reproducción de videos.
+                </video>
+            `;
+        }
+        imageContainer.classList.add('d-none');
+        videoContainer.classList.remove('d-none');
+    } else {
+        // It's an image
+        imageContainer.innerHTML = `
+            <img src="${mediaUrl}" class="img-fluid rounded" alt="${exerciseName || 'Imagen del ejercicio'}" style="max-height: 500px; object-fit: contain;">
+        `;
+        videoContainer.classList.add('d-none');
+        imageContainer.classList.remove('d-none');
+    }
+    
+    mediaContainer.classList.remove('d-none');
 }
 
 function addToRoutine() {

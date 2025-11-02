@@ -18,6 +18,7 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 	// Service HTML pages (may require authentication)
 	r.GET("/exercises", handlers.ExercisesPage)
 	r.GET("/exercises/create", handlers.ExerciseCreatePage)
+	r.GET("/exercises/:id/edit", handlers.ExerciseEditPage)
 	r.GET("/exercises/:id", handlers.ExerciseDetailPage)
 	r.GET("/routines", handlers.RoutinesPage)
 	r.GET("/routines/create", handlers.RoutineCreatePage)

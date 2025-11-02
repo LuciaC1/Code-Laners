@@ -49,6 +49,7 @@ function addExerciseToRoutine(exercise) {
     exerciseOrder++;
     const exerciseItem = {
         exercise_id: exercise.id,
+        exercise_name: exercise.name, // Save exercise name
         order: exerciseOrder,
         sets: 3,
         reps: 10,
@@ -89,7 +90,7 @@ function renderRoutineExercises() {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${item.order}</td>
-            <td>Ejercicio ${item.order}</td>
+            <td>${item.exercise_name || `Ejercicio ${item.order}`}</td>
             <td><input type="number" class="form-control form-control-sm" value="${item.sets}" 
                 onchange="updateExercise(${index}, 'sets', this.value)"></td>
             <td><input type="number" class="form-control form-control-sm" value="${item.reps}" 
@@ -109,6 +110,11 @@ function updateExercise(index, field, value) {
 
 function removeExercise(index) {
     selectedExercises.splice(index, 1);
+    // Reorder remaining exercises
+    selectedExercises.forEach((item, idx) => {
+        item.order = idx + 1;
+    });
+    exerciseOrder = selectedExercises.length;
     renderRoutineExercises();
 }
 
@@ -121,11 +127,20 @@ function showError(message) {
 document.getElementById('routineForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    // Filter exercises to only include fields needed by backend
+    const exercisesToSend = selectedExercises.map(ex => ({
+        exercise_id: ex.exercise_id,
+        order: ex.order,
+        sets: ex.sets,
+        reps: ex.reps,
+        weight: ex.weight || 0
+    }));
+    
     const routineData = {
         name: document.getElementById('name').value,
         description: document.getElementById('description').value,
         is_public: document.getElementById('is_public').checked,
-        exercises: selectedExercises
+        exercises: exercisesToSend
     };
 
     try {

@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         localStorage.setItem('user', JSON.stringify(data.user));
                     }
                     
+                    // Update navbar to hide login/register links (if function exists)
+                    if (typeof updateNavbarAfterLogin === 'function') {
+                        updateNavbarAfterLogin(data.user);
+                    }
+                    
                     // Redirect to profile with success message
                     window.location.href = '/profile?login=success';
                 } else {
