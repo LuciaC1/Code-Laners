@@ -46,7 +46,7 @@ function renderRoutine(routine) {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${exercise.order || '-'}</td>
-                <td>${exercise.exercise_name || exercise.exercise_id || '-'}</td>
+                <td>${exercise.exercise_name || 'Ejercicio sin nombre'}</td>
                 <td>${exercise.sets || '-'}</td>
                 <td>${exercise.reps || '-'}</td>
                 <td>${exercise.weight ? exercise.weight : '-'}</td>
@@ -81,7 +81,9 @@ function editRoutine() {
 }
 
 async function deleteRoutine() {
-    if (!confirm('¿Estás seguro de eliminar esta rutina?')) return;
+    if (!confirm('¿Estás seguro de eliminar esta rutina? Esta acción no se puede deshacer.')) {
+        return;
+    }
     
     try {
         const token = localStorage.getItem('token');
@@ -93,12 +95,15 @@ async function deleteRoutine() {
         });
 
         if (response.ok) {
+            alert('Rutina eliminada correctamente');
             window.location.href = '/routines';
         } else {
-            alert('Error al eliminar la rutina');
+            const data = await response.json();
+            alert(data.error || 'Error al eliminar la rutina');
         }
     } catch (error) {
         alert('Error al eliminar la rutina');
+        console.error('Error:', error);
     }
 }
 

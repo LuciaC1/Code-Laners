@@ -105,13 +105,13 @@ func (h *ExerciseHandler) DeleteExercise(c *gin.Context) {
 		return
 	}
 
-	err := h.service.DeleteExercise(id, userID.(string))
+	err := h.service.DeleteExercise(userID.(string), id)
 	if err != nil {
-		if err.Error() == "forbidden: only admins can delete exercises" {
+		if err.Error() == "unauthorized: cannot delete exercise you do not own" {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete exercise"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

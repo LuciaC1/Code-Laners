@@ -86,10 +86,24 @@ func RoutineDetailPage(c *gin.Context) {
 	})
 }
 
+func RoutineEditPage(c *gin.Context) {
+	c.HTML(200, "layout", gin.H{
+		"TemplateName": "routine-edit",
+		"Title":        "Editar Rutina",
+	})
+}
+
 func WorkoutDetailPage(c *gin.Context) {
 	c.HTML(200, "layout", gin.H{
 		"TemplateName": "workout-detail",
 		"Title":        "Detalle del Entrenamiento",
+	})
+}
+
+func WorkoutEditPage(c *gin.Context) {
+	c.HTML(200, "layout", gin.H{
+		"TemplateName": "workout-edit",
+		"Title":        "Editar Entrenamiento",
 	})
 }
 

@@ -92,7 +92,9 @@ function editWorkout() {
 }
 
 async function deleteWorkout() {
-    if (!confirm('¿Estás seguro de eliminar este entrenamiento?')) return;
+    if (!confirm('¿Estás seguro de eliminar este entrenamiento? Esta acción no se puede deshacer.')) {
+        return;
+    }
     
     try {
         const token = localStorage.getItem('token');
@@ -104,12 +106,15 @@ async function deleteWorkout() {
         });
 
         if (response.ok) {
+            alert('Entrenamiento eliminado correctamente');
             window.location.href = '/workouts';
         } else {
-            alert('Error al eliminar el entrenamiento');
+            const data = await response.json();
+            alert(data.error || 'Error al eliminar el entrenamiento');
         }
     } catch (error) {
         alert('Error al eliminar el entrenamiento');
+        console.error('Error:', error);
     }
 }
 

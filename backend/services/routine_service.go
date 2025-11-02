@@ -9,7 +9,6 @@ import (
 	"backend/dto"
 	"backend/models"
 	"backend/repositories"
-	"backend/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -81,7 +80,7 @@ func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineRequest)
 	}
 	if oid, ok := res.InsertedID.(primitive.ObjectID); ok {
 		routine.ID = oid
-		return utils.ConverModelToRoutineDTO(routine), nil
+		return s.convertModelToDTOWithExerciseNames(routine), nil
 	}
 	return dto.RoutineResponse{}, nil
 }
@@ -100,7 +99,7 @@ func (s *RoutineService) GetRoutines(ownerID string, name string) ([]dto.Routine
 	}
 	out := make([]dto.RoutineResponse, 0, len(modelsList))
 	for _, m := range modelsList {
-		out = append(out, utils.ConverModelToRoutineDTO(m))
+		out = append(out, s.convertModelToDTOWithExerciseNames(m))
 	}
 	return out, nil
 }
@@ -110,7 +109,7 @@ func (s *RoutineService) GetRoutineByID(id string) (dto.RoutineResponse, error) 
 	if err != nil {
 		return dto.RoutineResponse{}, err
 	}
-	return utils.ConverModelToRoutineDTO(m), nil
+	return s.convertModelToDTOWithExerciseNames(m), nil
 }
 
 func (s *RoutineService) UpdateRoutine(ownerID string, routineID string, input dto.RoutineRequest) (dto.RoutineResponse, error) {
@@ -159,7 +158,7 @@ func (s *RoutineService) UpdateRoutine(ownerID string, routineID string, input d
 	if err != nil {
 		return dto.RoutineResponse{}, err
 	}
-	return utils.ConverModelToRoutineDTO(updated), nil
+	return s.convertModelToDTOWithExerciseNames(updated), nil
 }
 
 func (s *RoutineService) DeleteRoutine(ownerID string, routineID string) error {
@@ -282,4 +281,35 @@ func (s *RoutineService) verifyExercisesExist(ids []primitive.ObjectID) error {
 		return fmt.Errorf("exercises not found: %s", strings.Join(missing, ","))
 	}
 	return nil
+}
+
+// convertModelToDTOWithExerciseNames converts a Routine model to DTO and includes exercise names
+func (s *RoutineService) convertModelToDTOWithExerciseNames(routine models.Routine) dto.RoutineResponse {
+	entries := make([]dto.RoutineExcerciseList, len(routine.Entries))
+	for i, entry := range routine.Entries {
+		exerciseName := ""
+		// Get exercise name from repository
+		if !entry.ExerciseID.IsZero() {
+			exercise, err := s.exerciseRepo.GetExerciseByID(entry.ExerciseID.Hex())
+			if err == nil && !exercise.ID.IsZero() {
+				exerciseName = exercise.Name
+			}
+		}
+		entries[i] = dto.RoutineExcerciseList{
+			ExerciseID:   entry.ExerciseID.Hex(),
+			ExerciseName: exerciseName,
+			Order:        entry.Order,
+			Sets:         entry.Sets,
+			Reps:         entry.Reps,
+			Weight:       entry.Weight,
+		}
+	}
+	return dto.RoutineResponse{
+		ID:          routine.ID.Hex(),
+		UserID:      routine.OwnerID.Hex(),
+		Name:        routine.Name,
+		Excercises:  entries,
+		Description: routine.Description,
+		IsPublic:    routine.IsPublic,
+	}
 }

@@ -171,23 +171,6 @@ function renderMedia(mediaUrl, exerciseName) {
                 </div>
             `;
         }
-        // Handle Vimeo
-        else if (mediaUrl.includes('vimeo.com')) {
-            const vimeoEmbed = getVimeoEmbedUrl(mediaUrl);
-            if (vimeoEmbed) {
-                videoContainer.innerHTML = `
-                    <div class="ratio ratio-16x9">
-                        <iframe 
-                            src="${vimeoEmbed}" 
-                            frameborder="0" 
-                            allow="autoplay; fullscreen; picture-in-picture" 
-                            allowfullscreen
-                            title="${exerciseName || 'Video del ejercicio'}">
-                        </iframe>
-                    </div>
-                `;
-            }
-        }
         // Handle direct video files
         else {
             videoContainer.innerHTML = `

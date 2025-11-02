@@ -18,9 +18,10 @@ type RoutineResponse struct {
 }
 
 type RoutineExcerciseList struct {
-	ExerciseID string  `json:"exercise_id" binding:"required"`
-	Order      int     `json:"order" binding:"required"`
-	Sets       int     `json:"sets" binding:"required"`
-	Reps       int     `json:"reps" binding:"required"`
-	Weight     float64 `json:"weight,omitempty"`
+	ExerciseID   string  `json:"exercise_id" binding:"required"`
+	ExerciseName string  `json:"exercise_name,omitempty"`
+	Order        int     `json:"order" binding:"required"`
+	Sets         int     `json:"sets" binding:"required"`
+	Reps         int     `json:"reps" binding:"required"`
+	Weight       float64 `json:"weight,omitempty"`
 }

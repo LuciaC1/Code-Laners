@@ -1,0 +1,71 @@
+{{define "workout-edit"}}
+<div class="container my-5">
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="/workouts" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Entrenamientos
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="bi bi-pencil-square"></i> Editar Entrenamiento</h3>
+                </div>
+                <div class="card-body">
+                    <div id="loadingSpinner" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+
+                    <form id="workoutForm" class="d-none">
+                        <div class="mb-3">
+                            <label for="routine_id" class="form-label">Rutina (Opcional)</label>
+                            <select class="form-select" id="routine_id" name="routine_id">
+                                <option value="">Ninguna</option>
+                                <!-- Routines will be loaded here -->
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="duration_minutes" class="form-label">Duración (minutos)</label>
+                                <input type="number" class="form-control" id="duration_minutes" name="duration_minutes" min="1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="estimated_calories" class="form-label">Calorías Estimadas</label>
+                                <input type="number" class="form-control" id="estimated_calories" name="estimated_calories" min="0">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="completed_at_date" class="form-label">Fecha de Finalización</label>
+                            <input type="date" class="form-control" id="completed_at_date" name="completed_at_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="completed_at_time" class="form-label">Hora de Finalización</label>
+                            <input type="time" class="form-control" id="completed_at_time" name="completed_at_time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notas</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="4" 
+                                placeholder="Anota tus observaciones sobre este entrenamiento..."></textarea>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='/workouts'">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-check-circle"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                    <div id="errorMessage" class="alert alert-danger d-none mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+

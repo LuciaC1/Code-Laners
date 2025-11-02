@@ -87,12 +87,16 @@
             {{template "routine-detail" .}}
         {{else if eq .TemplateName "routine-create"}}
             {{template "routine-create" .}}
+        {{else if eq .TemplateName "routine-edit"}}
+            {{template "routine-edit" .}}
         {{else if eq .TemplateName "workouts"}}
             {{template "workouts" .}}
         {{else if eq .TemplateName "workout-detail"}}
             {{template "workout-detail" .}}
         {{else if eq .TemplateName "workout-create"}}
             {{template "workout-create" .}}
+        {{else if eq .TemplateName "workout-edit"}}
+            {{template "workout-edit" .}}
         {{else if eq .TemplateName "profile"}}
             {{template "profile" .}}
         {{else if eq .TemplateName "stats"}}
@@ -135,12 +139,16 @@
         <script src="/static/js/routine-detail.js"></script>
     {{else if eq .TemplateName "routine-create"}}
         <script src="/static/js/routine-create.js"></script>
+    {{else if eq .TemplateName "routine-edit"}}
+        <script src="/static/js/routine-edit.js"></script>
     {{else if eq .TemplateName "workouts"}}
         <script src="/static/js/workouts.js"></script>
     {{else if eq .TemplateName "workout-detail"}}
         <script src="/static/js/workout-detail.js"></script>
     {{else if eq .TemplateName "workout-create"}}
         <script src="/static/js/workout-create.js"></script>
+    {{else if eq .TemplateName "workout-edit"}}
+        <script src="/static/js/workout-edit.js"></script>
     {{else if eq .TemplateName "profile"}}
         <script src="/static/js/profile.js"></script>
     {{else if eq .TemplateName "stats"}}
