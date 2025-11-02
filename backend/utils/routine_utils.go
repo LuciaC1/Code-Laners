@@ -1,10 +1,8 @@
 package utils
-
 import (
 	"backend/dto"
 	"backend/models"
 )
-
 func ConverModelToRoutineDTO(routine models.Routine) dto.RoutineResponse {
 	entries := make([]dto.RoutineExcerciseList, len(routine.Entries))
 	for i, entry := range routine.Entries {
@@ -25,7 +23,6 @@ func ConverModelToRoutineDTO(routine models.Routine) dto.RoutineResponse {
 		IsPublic:    routine.IsPublic,
 	}
 }
-
 func ConvertModelToRoutineExcerciseListDTO(entry models.RoutineExcerciseList) dto.RoutineExcerciseList {
 	return dto.RoutineExcerciseList{
 		ExerciseID: entry.ExerciseID.Hex(),

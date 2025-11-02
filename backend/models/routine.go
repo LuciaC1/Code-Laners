@@ -1,11 +1,8 @@
 package models
-
 import (
 	"time"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
 type RoutineExcerciseList struct {
 	ExerciseID primitive.ObjectID `bson:"exercise_id" json:"exercise_id"`
 	Order      int                `bson:"order" json:"order"`
@@ -13,7 +10,6 @@ type RoutineExcerciseList struct {
 	Reps       int                `bson:"reps" json:"reps"`
 	Weight     float64            `bson:"weight,omitempty" json:"weight,omitempty"`
 }
-
 type Routine struct {
 	ID          primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
 	OwnerID     primitive.ObjectID     `bson:"owner_id" json:"owner_id"`

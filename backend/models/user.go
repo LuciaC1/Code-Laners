@@ -1,18 +1,13 @@
 package models
-
 import (
 	"time"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
 type Role string
-
 const (
 	RoleAdmin Role = "admin"
 	RoleUser  Role = "user"
 )
-
 type User struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name         string             `bson:"name" json:"name"`

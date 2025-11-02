@@ -1,5 +1,3 @@
-
-
 function addStep() {
     const container = document.getElementById('stepsContainer');
     const stepCount = container.children.length + 1;
@@ -13,24 +11,19 @@ function addStep() {
     `;
     container.appendChild(stepDiv);
 }
-
 function removeStep(button) {
     button.parentElement.remove();
 }
-
 function showError(message) {
     const errorDiv = document.getElementById('errorMessage');
     errorDiv.textContent = message;
     errorDiv.classList.remove('d-none');
 }
-
 document.getElementById('exerciseForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const steps = Array.from(document.querySelectorAll('.step-input'))
         .map(input => input.value)
         .filter(value => value.trim() !== '');
-
     const exerciseData = {
         name: document.getElementById('name').value,
         description: document.getElementById('description').value,
@@ -40,7 +33,6 @@ document.getElementById('exerciseForm').addEventListener('submit', async (e) => 
         media_url: document.getElementById('media_url').value,
         steps: steps
     };
-
     try {
         const token = localStorage.getItem('token');
         const response = await fetch('/api/exercises', {
@@ -51,7 +43,6 @@ document.getElementById('exerciseForm').addEventListener('submit', async (e) => 
             },
             body: JSON.stringify(exerciseData)
         });
-
         if (response.ok) {
             window.location.href = '/exercises';
         } else {
@@ -62,4 +53,3 @@ document.getElementById('exerciseForm').addEventListener('submit', async (e) => 
         showError('Error al crear el ejercicio');
     }
 });
-

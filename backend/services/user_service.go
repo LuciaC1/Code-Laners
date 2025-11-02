@@ -1,20 +1,16 @@
 package services
-
 import (
 	"errors"
 	"regexp"
 	"time"
-
 	"backend/auth"
 	"backend/database"
 	"backend/dto"
 	"backend/models"
 	"backend/repositories"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
 type UserServiceInterface interface {
 	Register(req dto.RegisterRequest) (dto.RegisterResponse, error)
 	Login(req dto.LoginRequest) (dto.User, error)
@@ -25,15 +21,12 @@ type UserServiceInterface interface {
 	UpdateUserRole(id string, role string) error
 	DeleteUser(id string) error
 }
-
 type UserService struct {
 	repo repositories.UserRepositoryInterface
 }
-
 func NewUserService(repo repositories.UserRepositoryInterface) *UserService {
 	return &UserService{repo: repo}
 }
-
 func (s *UserService) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
 	if req.Name == "" || req.Email == "" || req.Password == "" || req.DateOfBirth == "" {
 		return dto.RegisterResponse{}, errors.New("datos incompletos")
@@ -79,7 +72,6 @@ func (s *UserService) Register(req dto.RegisterRequest) (dto.RegisterResponse, e
 	}
 	user.Level = req.Level
 	user.Goals = req.Goals
-
 	res, err := s.repo.CreateUser(user)
 	if err != nil {
 		return dto.RegisterResponse{}, err
@@ -100,7 +92,6 @@ func (s *UserService) Register(req dto.RegisterRequest) (dto.RegisterResponse, e
 		CreatedAt:   user.CreatedAt,
 		UpdatedAt:   user.UpdatedAt,
 	}, nil
-
 }
 func (s *UserService) Login(req dto.LoginRequest) (dto.User, error) {
 	if req.Email == "" || req.Password == "" {
@@ -120,7 +111,6 @@ func (s *UserService) Login(req dto.LoginRequest) (dto.User, error) {
 	userdto.PasswordHash = ""
 	return userdto, nil
 }
-
 func (s *UserService) GetUsers(name string) ([]dto.User, error) {
 	models, err := s.repo.GetUser(name)
 	if err != nil {
@@ -132,7 +122,6 @@ func (s *UserService) GetUsers(name string) ([]dto.User, error) {
 	}
 	return out, nil
 }
-
 func (s *UserService) GetUserByID(id string) (dto.User, error) {
 	m, err := s.repo.GetUserByID(id)
 	if err != nil {
@@ -140,7 +129,6 @@ func (s *UserService) GetUserByID(id string) (dto.User, error) {
 	}
 	return modelUserToDTO(m), nil
 }
-
 func (s *UserService) UpdateUser(id string, req dto.UpdateUserRequest) error {
 	m, err := s.repo.GetUserByID(id)
 	if err != nil {
@@ -149,7 +137,6 @@ func (s *UserService) UpdateUser(id string, req dto.UpdateUserRequest) error {
 	if req.Email != "" && !isValidEmail(req.Email) {
 		return errors.New("email inválido")
 	}
-
 	if req.Name != "" {
 		m.Name = req.Name
 	}
@@ -172,7 +159,6 @@ func (s *UserService) UpdateUser(id string, req dto.UpdateUserRequest) error {
 	_, err = s.repo.UpdateUser(m)
 	return err
 }
-
 func (s *UserService) ChangePassword(id string, req dto.ChangePasswordRequest) error {
 	m, err := s.repo.GetUserByID(id)
 	if err != nil {
@@ -191,7 +177,6 @@ func (s *UserService) ChangePassword(id string, req dto.ChangePasswordRequest) e
 	if err != nil {
 		return err
 	}
-
 	db := database.NewMongoDB()
 	refreshRepo := repositories.NewRefreshTokenRepository(db)
 	objID, err := primitive.ObjectIDFromHex(id)
@@ -200,23 +185,19 @@ func (s *UserService) ChangePassword(id string, req dto.ChangePasswordRequest) e
 	}
 	return err
 }
-
 func (s *UserService) UpdateUserRole(id string, role string) error {
 	if role != "admin" && role != "user" {
 		return errors.New("rol inválido. Debe ser 'admin' o 'user'")
 	}
-
 	m, err := s.repo.GetUserByID(id)
 	if err != nil {
 		return err
 	}
-
 	m.Role = models.Role(role)
 	m.UpdatedAt = time.Now()
 	_, err = s.repo.UpdateUser(m)
 	return err
 }
-
 func (s *UserService) DeleteUser(id string) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -225,12 +206,10 @@ func (s *UserService) DeleteUser(id string) error {
 	_, err = s.repo.DeleteUser(objID)
 	return err
 }
-
 func isValidEmail(email string) bool {
 	re := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 	return re.MatchString(email)
 }
-
 func modelUserToDTO(m models.User) dto.User {
 	return dto.User{
 		ID:          m.ID,

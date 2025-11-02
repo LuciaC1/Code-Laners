@@ -1,17 +1,13 @@
-
-
 async function loadExercises(params = null) {
     try {
         const token = localStorage.getItem('token');
         let url = '/api/exercises';
-        
         if (params) {
             const queryString = params.toString();
             if (queryString) {
                 url += '?' + queryString;
             }
         }
-        
         const response = await fetch(url, {
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -25,16 +21,13 @@ async function loadExercises(params = null) {
         container.innerHTML = '<div class="col-12"><div class="alert alert-danger">Error al cargar ejercicios</div></div>';
     }
 }
-
 function renderExercises(exercises) {
     const container = document.getElementById('exercisesContainer');
     container.innerHTML = '';
-    
     if (exercises.length === 0) {
         container.innerHTML = '<div class="col-12"><div class="alert alert-info">No se encontraron ejercicios</div></div>';
         return;
     }
-
     exercises.forEach(exercise => {
         const card = document.createElement('div');
         card.className = 'col-md-4';
@@ -57,19 +50,14 @@ function renderExercises(exercises) {
         container.appendChild(card);
     });
 }
-
 function applyFilters() {
     const name = document.getElementById('filterName').value;
     const category = document.getElementById('filterCategory').value;
     const muscleGroup = document.getElementById('filterMuscleGroup').value;
-    
     const params = new URLSearchParams();
     if (name) params.append('name', name);
     if (category) params.append('category', category);
     if (muscleGroup) params.append('muscle_group', muscleGroup);
-
     loadExercises(params);
 }
-
 document.addEventListener('DOMContentLoaded', loadExercises);
-

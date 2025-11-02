@@ -1,11 +1,9 @@
 package utils
-
 import (
 	"backend/dto"
 	"backend/models"
 	"time"
 )
-
 func ConvertExerciseModelToDTO(exercise models.Exercise) dto.ExerciseResponse {
 	return dto.ExerciseResponse{
 		ID:          exercise.ID.Hex(),
@@ -26,7 +24,6 @@ func ConvertExerciseModelsToDTOList(exercises []models.Exercise) []dto.ExerciseR
 	}
 	return dtos
 }
-
 func ConvertModelToExerciseRequest(exercise models.Exercise) dto.ExerciseRequest {
 	return dto.ExerciseRequest{
 		Name:        exercise.Name,

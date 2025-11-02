@@ -1,16 +1,12 @@
 package repositories
-
 import (
 	"context"
-
 	"backend/database"
 	"backend/models"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
 type UserRepositoryInterface interface {
 	GetUser(name string) ([]models.User, error)
 	GetUserByID(id string) (models.User, error)
@@ -22,7 +18,6 @@ type UserRepositoryInterface interface {
 type UserRepository struct {
 	db database.DB
 }
-
 func NewUserRepository(db database.DB) *UserRepository {
 	return &UserRepository{
 		db: db,
@@ -30,21 +25,17 @@ func NewUserRepository(db database.DB) *UserRepository {
 }
 func (repository UserRepository) GetUser(name string) ([]models.User, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
-
 	var filter bson.M
-
 	if name != "" {
 		filter = bson.M{"name": bson.M{"$regex": name, "$options": "i"}}
 	} else {
 		filter = bson.M{}
 	}
-
 	cursor, err := collection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(context.Background())
-
 	var users []models.User
 	for cursor.Next(context.Background()) {
 		var user models.User
@@ -54,7 +45,6 @@ func (repository UserRepository) GetUser(name string) ([]models.User, error) {
 		}
 		users = append(users, user)
 	}
-
 	return users, nil
 }
 func (repository UserRepository) GetUserByID(id string) (models.User, error) {
@@ -63,14 +53,11 @@ func (repository UserRepository) GetUserByID(id string) (models.User, error) {
 	if err != nil {
 		return models.User{}, err
 	}
-
 	filter := bson.M{"_id": objectID}
 	var user models.User
-
 	err = collection.FindOne(context.TODO(), filter).Decode(&user)
 	return user, err
 }
-
 func (repository UserRepository) GetUserByEmail(email string) (models.User, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
 	filter := bson.M{"email": email}
@@ -78,16 +65,13 @@ func (repository UserRepository) GetUserByEmail(email string) (models.User, erro
 	err := collection.FindOne(context.TODO(), filter).Decode(&user)
 	return user, err
 }
-
 func (repository UserRepository) CreateUser(user models.User) (*mongo.InsertOneResult, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
 	result, err := collection.InsertOne(context.TODO(), user)
 	return result, err
 }
-
 func (repository UserRepository) UpdateUser(user models.User) (*mongo.UpdateResult, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
-
 	filter := bson.M{"_id": user.ID}
 	setFields := bson.M{
 		"name":          user.Name,
@@ -96,11 +80,9 @@ func (repository UserRepository) UpdateUser(user models.User) (*mongo.UpdateResu
 		"date_of_birth": user.DateOfBirth,
 		"updated_at":    user.UpdatedAt,
 	}
-
 	if user.PasswordHash != "" {
 		setFields["password_hash"] = user.PasswordHash
 	}
-
 	if user.Weight != 0 {
 		setFields["weight"] = user.Weight
 	}
@@ -113,15 +95,12 @@ func (repository UserRepository) UpdateUser(user models.User) (*mongo.UpdateResu
 	if user.Goals != nil {
 		setFields["goals"] = user.Goals
 	}
-
 	update := bson.M{"$set": setFields}
 	result, err := collection.UpdateOne(context.TODO(), filter, update)
 	return result, err
 }
-
 func (repository UserRepository) DeleteUser(id primitive.ObjectID) (*mongo.DeleteResult, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
-
 	filter := bson.M{"_id": id}
 	result, err := collection.DeleteOne(context.TODO(), filter)
 	return result, err

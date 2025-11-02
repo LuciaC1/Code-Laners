@@ -1,7 +1,4 @@
-
-
 let currentWorkoutId = null;
-
 async function loadWorkout() {
     const workoutId = window.location.pathname.split('/').pop();
     currentWorkoutId = workoutId;
@@ -12,11 +9,9 @@ async function loadWorkout() {
                 'Authorization': 'Bearer ' + token
             }
         });
-
         if (!response.ok) {
             throw new Error('Entrenamiento no encontrado');
         }
-
         const workout = await response.json();
         renderWorkout(workout);
     } catch (error) {
@@ -25,15 +20,12 @@ async function loadWorkout() {
         document.getElementById('errorMessage').classList.remove('d-none');
     }
 }
-
 function renderWorkout(workout) {
     document.getElementById('loadingSpinner').classList.add('d-none');
     document.getElementById('workoutContent').classList.remove('d-none');
-
     const completedAt = new Date(workout.completed_at);
     document.getElementById('workoutDate').innerHTML = 
         `<i class="bi bi-calendar"></i> ${completedAt.toLocaleDateString('es-ES')} ${completedAt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
-
     if (workout.routine_id) {
         const routineDiv = document.getElementById('workoutRoutine');
         routineDiv.innerHTML = `
@@ -44,24 +36,20 @@ function renderWorkout(workout) {
         `;
         routineDiv.classList.remove('d-none');
     }
-
     if (workout.duration_minutes) {
         const durationDiv = document.getElementById('workoutDuration');
         durationDiv.innerHTML = `<i class="bi bi-clock"></i> <strong>Duración:</strong> ${workout.duration_minutes} minutos`;
         durationDiv.classList.remove('d-none');
     }
-
     if (workout.estimated_calories) {
         const caloriesDiv = document.getElementById('workoutCalories');
         caloriesDiv.innerHTML = `<i class="bi bi-fire"></i> <strong>Calorías estimadas:</strong> ${workout.estimated_calories} kcal`;
         caloriesDiv.classList.remove('d-none');
     }
-
     if (workout.notes) {
         document.getElementById('notesText').textContent = workout.notes;
         document.getElementById('workoutNotes').classList.remove('d-none');
     }
-
     const updatedAt = workout.updated_at ? new Date(workout.updated_at) : null;
     const info = document.getElementById('workoutInfo');
     let infoHTML = `
@@ -84,18 +72,15 @@ function renderWorkout(workout) {
     }
     info.innerHTML = infoHTML;
 }
-
 function editWorkout() {
     if (currentWorkoutId) {
         window.location.href = `/workouts/${currentWorkoutId}/edit`;
     }
 }
-
 async function deleteWorkout() {
     if (!confirm('¿Estás seguro de eliminar este entrenamiento? Esta acción no se puede deshacer.')) {
         return;
     }
-    
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/workouts/${currentWorkoutId}`, {
@@ -104,7 +89,6 @@ async function deleteWorkout() {
                 'Authorization': 'Bearer ' + token
             }
         });
-
         if (response.ok) {
             alert('Entrenamiento eliminado correctamente');
             window.location.href = '/workouts';
@@ -117,6 +101,4 @@ async function deleteWorkout() {
         console.error('Error:', error);
     }
 }
-
 document.addEventListener('DOMContentLoaded', loadWorkout);
-

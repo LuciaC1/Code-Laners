@@ -1,10 +1,8 @@
 package utils
-
 import (
 	"backend/dto"
 	"backend/models"
 )
-
 func ConvertWorkoutModelToDTO(workout models.Workout) dto.WorkoutDTO {
 	return dto.WorkoutDTO{
 		ID:                workout.ID,

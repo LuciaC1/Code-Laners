@@ -7,13 +7,10 @@
                     <h3 class="mb-0"><i class="bi bi-person-circle"></i> Mi Perfil</h3>
                 </div>
                 <div class="card-body">
-                    
                     <div id="loginSuccessMessage" class="alert alert-success alert-dismissible fade show d-none" role="alert">
                         <i class="bi bi-check-circle"></i> <strong>¡Bienvenido!</strong> Has iniciado sesión correctamente.
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                    
-                    
                     <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab">
@@ -36,10 +33,7 @@
                             </button>
                         </li>
                     </ul>
-
-                    
                     <div class="tab-content" id="profileTabsContent">
-                        
                         <div class="tab-pane fade show active" id="personal" role="tabpanel">
                             <h5 class="mb-4">Información Personal</h5>
                             <form id="personalInfoForm">
@@ -67,8 +61,6 @@
                             <div id="personalInfoError" class="alert alert-danger d-none mt-3"></div>
                             <div id="personalInfoSuccess" class="alert alert-success d-none mt-3"></div>
                         </div>
-
-                        
                         <div class="tab-pane fade" id="physical" role="tabpanel">
                             <h5 class="mb-4">Datos Físicos</h5>
                             <form id="physicalDataForm">
@@ -100,8 +92,6 @@
                             <div id="physicalDataError" class="alert alert-danger d-none mt-3"></div>
                             <div id="physicalDataSuccess" class="alert alert-success d-none mt-3"></div>
                         </div>
-
-                        
                         <div class="tab-pane fade" id="goals" role="tabpanel">
                             <h5 class="mb-4">Objetivos de Fitness</h5>
                             <form id="goalsForm">
@@ -135,8 +125,6 @@
                             <div id="goalsError" class="alert alert-danger d-none mt-3"></div>
                             <div id="goalsSuccess" class="alert alert-success d-none mt-3"></div>
                         </div>
-
-                        
                         <div class="tab-pane fade" id="password" role="tabpanel">
                             <h5 class="mb-4">Cambiar Contraseña</h5>
                             <form id="changePasswordForm">
@@ -169,4 +157,3 @@
     </div>
 </div>
 {{end}}
-

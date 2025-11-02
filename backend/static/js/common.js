@@ -1,16 +1,8 @@
-
-
-
 function updateAuthSection() {
     const authSection = document.getElementById('authSection');
     if (!authSection) return; 
-    
     const token = localStorage.getItem('token');
-    
     if (token) {
-        
-        
-        
         const userStr = localStorage.getItem('user');
         let userName = 'Usuario';
         let user = null;
@@ -19,11 +11,8 @@ function updateAuthSection() {
                 user = JSON.parse(userStr);
                 userName = user.name || 'Usuario';
             } catch (e) {
-                
             }
         }
-
-        
         const isAdmin = user && user.role === 'admin';
         const adminMenu = isAdmin ? `
             <li><hr class="dropdown-divider"></li>
@@ -31,7 +20,6 @@ function updateAuthSection() {
                 <i class="bi bi-speedometer2 me-2"></i>Panel Admin
             </a></li>
         ` : '';
-
         authSection.innerHTML = `
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -53,15 +41,12 @@ function updateAuthSection() {
                 </ul>
             </li>
         `;
-        
-        
         const serverMenu = document.getElementById('userMenu');
         if (serverMenu && isAdmin) {
             const adminLinks = serverMenu.querySelectorAll('#adminMenuLink');
             adminLinks.forEach(link => link.style.display = '');
         }
     } else {
-        
         authSection.innerHTML = `
             <li class="nav-item">
                 <a class="nav-link" href="/login">
@@ -76,22 +61,16 @@ function updateAuthSection() {
         `;
     }
 }
-
-
 function logout() {
     if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
         localStorage.removeItem('token');
         window.location.href = '/login';
     }
 }
-
-
 function isAuthenticated() {
     const token = localStorage.getItem('token');
     return !!token;
 }
-
-
 function requireAuth() {
     if (!isAuthenticated()) {
         window.location.href = '/login';
@@ -99,8 +78,6 @@ function requireAuth() {
     }
     return true;
 }
-
-
 function getApiHeaders() {
     const token = localStorage.getItem('token');
     return {
@@ -108,13 +85,10 @@ function getApiHeaders() {
         'Authorization': `Bearer ${token}`
     };
 }
-
-
 function createUserDropdown(user) {
     const userStr = localStorage.getItem('user');
     let userName = 'Usuario';
     let isAdmin = false;
-    
     if (user) {
         userName = user.name || 'Usuario';
         isAdmin = user.role === 'admin';
@@ -124,15 +98,12 @@ function createUserDropdown(user) {
             userName = parsedUser.name || 'Usuario';
             isAdmin = parsedUser.role === 'admin';
         } catch (e) {
-            
         }
     }
-    
     const adminMenu = isAdmin ? `
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="/admin"><i class="bi bi-speedometer2"></i> Panel Admin</a></li>
     ` : '';
-    
     return `
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
@@ -148,38 +119,27 @@ function createUserDropdown(user) {
         </li>
     `;
 }
-
-
 function updateNavbarAfterLogin(user) {
     const token = localStorage.getItem('token');
-    
     if (token) {
-        
         const loginLinks = document.querySelectorAll('a[href="/login"]');
         const registerLinks = document.querySelectorAll('a[href="/register"]');
-        
         loginLinks.forEach(link => {
             const navItem = link.closest('li.nav-item');
             if (navItem && !navItem.classList.contains('dropdown')) {
                 navItem.style.display = 'none';
             }
         });
-        
         registerLinks.forEach(link => {
             const navItem = link.closest('li.nav-item');
             if (navItem && !navItem.classList.contains('dropdown')) {
                 navItem.style.display = 'none';
             }
         });
-        
-        
         let userDropdown = document.querySelector('li.nav-item.dropdown');
-        
         if (!userDropdown) {
-            
             const navbarNav = document.querySelector('.navbar-nav:last-child');
             if (navbarNav) {
-                
                 loginLinks.forEach(link => {
                     const navItem = link.closest('li.nav-item');
                     if (navItem) {
@@ -192,17 +152,13 @@ function updateNavbarAfterLogin(user) {
                         navItem.remove();
                     }
                 });
-                
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = createUserDropdown(user);
                 navbarNav.appendChild(tempDiv.firstElementChild);
                 userDropdown = document.querySelector('li.nav-item.dropdown');
             }
         } else {
-            
             userDropdown.style.display = '';
-            
-            
             if (user && user.name) {
                 const dropdownToggle = userDropdown.querySelector('.dropdown-toggle');
                 if (dropdownToggle) {
@@ -212,34 +168,23 @@ function updateNavbarAfterLogin(user) {
         }
     }
 }
-
-
 function updateNavbarOnLoad() {
     const token = localStorage.getItem('token');
-    
     if (token) {
-        
-        
         let userDropdown = document.querySelector('li.nav-item.dropdown');
-        
         if (!userDropdown) {
-            
             const navbarNav = document.querySelector('.navbar-nav:last-child');
             if (navbarNav) {
-                
                 const userStr = localStorage.getItem('user');
                 let user = null;
                 if (userStr) {
                     try {
                         user = JSON.parse(userStr);
                     } catch (e) {
-                        
                     }
                 }
-                
                 const loginLinks = document.querySelectorAll('a[href="/login"]');
                 const registerLinks = document.querySelectorAll('a[href="/register"]');
-                
                 loginLinks.forEach(link => {
                     const navItem = link.closest('li.nav-item');
                     if (navItem && !navItem.classList.contains('dropdown')) {
@@ -252,25 +197,20 @@ function updateNavbarOnLoad() {
                         navItem.remove();
                     }
                 });
-                
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = createUserDropdown(user);
                 navbarNav.appendChild(tempDiv.firstElementChild);
             }
         } else {
-            
             userDropdown.style.display = '';
-            
             const loginLinks = document.querySelectorAll('a[href="/login"]');
             const registerLinks = document.querySelectorAll('a[href="/register"]');
-            
             loginLinks.forEach(link => {
                 const navItem = link.closest('li.nav-item');
                 if (navItem && !navItem.classList.contains('dropdown')) {
                     navItem.style.display = 'none';
                 }
             });
-            
             registerLinks.forEach(link => {
                 const navItem = link.closest('li.nav-item');
                 if (navItem && !navItem.classList.contains('dropdown')) {
@@ -279,43 +219,31 @@ function updateNavbarOnLoad() {
             });
         }
     } else {
-        
         const loginLinks = document.querySelectorAll('a[href="/login"]');
         const registerLinks = document.querySelectorAll('a[href="/register"]');
         const userDropdown = document.querySelector('li.nav-item.dropdown');
-        
         loginLinks.forEach(link => {
             const navItem = link.closest('li.nav-item');
             if (navItem && !navItem.classList.contains('dropdown')) {
                 navItem.style.display = '';
             }
         });
-        
         registerLinks.forEach(link => {
             const navItem = link.closest('li.nav-item');
             if (navItem && !navItem.classList.contains('dropdown')) {
                 navItem.style.display = '';
             }
         });
-        
         if (userDropdown) {
             userDropdown.style.display = 'none';
         }
     }
 }
-
-
 document.addEventListener('DOMContentLoaded', function() {
-    
     const isIndexPage = window.location.pathname === '/';
-    
-    
     updateNavbarOnLoad();
-    
     if (!isIndexPage) {
         updateAuthSection();
-        
-        
         window.addEventListener('storage', function(e) {
             if (e.key === 'token') {
                 updateAuthSection();
@@ -323,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     } else {
-        
         window.addEventListener('storage', function(e) {
             if (e.key === 'token') {
                 updateNavbarOnLoad();

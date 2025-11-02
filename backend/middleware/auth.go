@@ -1,14 +1,10 @@
 package middleware
-
 import (
 	"net/http"
 	"strings"
-
 	"backend/auth"
-
 	"github.com/gin-gonic/gin"
 )
-
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -17,14 +13,12 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
 		tokenParts := strings.Split(authHeader, " ")
 		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Formato de token inválido"})
 			c.Abort()
 			return
 		}
-
 		tokenString := tokenParts[1]
 		claims, err := auth.ValidateToken(tokenString)
 		if err != nil {
@@ -32,11 +26,9 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
 		c.Set("user_id", claims.UserID)
 		c.Set("user_email", claims.Email)
 		c.Set("user_role", claims.Role)
-
 		c.Next()
 	}
 }

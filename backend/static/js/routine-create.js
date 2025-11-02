@@ -1,8 +1,5 @@
-
-
 let selectedExercises = [];
 let exerciseOrder = 0;
-
 async function loadExerciseSelector() {
     try {
         const token = localStorage.getItem('token');
@@ -13,18 +10,15 @@ async function loadExerciseSelector() {
         });
         const data = await response.json();
         renderAvailableExercises(data.exercises || []);
-        
         const modal = new bootstrap.Modal(document.getElementById('exerciseSelectorModal'));
         modal.show();
     } catch (error) {
         console.error('Error loading exercises:', error);
     }
 }
-
 function renderAvailableExercises(exercises) {
     const container = document.getElementById('availableExercises');
     container.innerHTML = '';
-    
     exercises.forEach(exercise => {
         const item = document.createElement('a');
         item.href = '#';
@@ -44,7 +38,6 @@ function renderAvailableExercises(exercises) {
         container.appendChild(item);
     });
 }
-
 function addExerciseToRoutine(exercise) {
     exerciseOrder++;
     const exerciseItem = {
@@ -58,16 +51,13 @@ function addExerciseToRoutine(exercise) {
     selectedExercises.push(exerciseItem);
     renderRoutineExercises();
 }
-
 function renderRoutineExercises() {
     const container = document.getElementById('routineExercises');
     container.innerHTML = '<h6 class="mt-3">Ejercicios Seleccionados:</h6>';
-    
     if (selectedExercises.length === 0) {
         container.innerHTML += '<p class="text-muted">No hay ejercicios agregados</p>';
         return;
     }
-
     const table = document.createElement('table');
     table.className = 'table table-bordered';
     table.innerHTML = `
@@ -84,7 +74,6 @@ function renderRoutineExercises() {
         <tbody id="routineExercisesBody"></tbody>
     `;
     container.appendChild(table);
-
     const tbody = document.getElementById('routineExercisesBody');
     selectedExercises.forEach((item, index) => {
         const row = document.createElement('tr');
@@ -103,31 +92,24 @@ function renderRoutineExercises() {
         tbody.appendChild(row);
     });
 }
-
 function updateExercise(index, field, value) {
     selectedExercises[index][field] = field === 'weight' ? parseFloat(value) : parseInt(value);
 }
-
 function removeExercise(index) {
     selectedExercises.splice(index, 1);
-    
     selectedExercises.forEach((item, idx) => {
         item.order = idx + 1;
     });
     exerciseOrder = selectedExercises.length;
     renderRoutineExercises();
 }
-
 function showError(message) {
     const errorDiv = document.getElementById('errorMessage');
     errorDiv.textContent = message;
     errorDiv.classList.remove('d-none');
 }
-
 document.getElementById('routineForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    
     const exercisesToSend = selectedExercises.map(ex => ({
         exercise_id: ex.exercise_id,
         order: ex.order,
@@ -135,14 +117,12 @@ document.getElementById('routineForm').addEventListener('submit', async (e) => {
         reps: ex.reps,
         weight: ex.weight || 0
     }));
-    
     const routineData = {
         name: document.getElementById('name').value,
         description: document.getElementById('description').value,
         is_public: document.getElementById('is_public').checked,
         exercises: exercisesToSend
     };
-
     try {
         const token = localStorage.getItem('token');
         const response = await fetch('/api/routines', {
@@ -153,7 +133,6 @@ document.getElementById('routineForm').addEventListener('submit', async (e) => {
             },
             body: JSON.stringify(routineData)
         });
-
         if (response.ok) {
             window.location.href = '/routines';
         } else {
@@ -164,4 +143,3 @@ document.getElementById('routineForm').addEventListener('submit', async (e) => {
         showError('Error al crear la rutina');
     }
 });
-

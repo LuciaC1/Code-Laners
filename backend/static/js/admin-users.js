@@ -1,16 +1,10 @@
-
-
 let allUsers = []; 
-
 document.addEventListener('DOMContentLoaded', function() {
     if (!requireAuth()) {
         return;
     }
-    
     checkAdminAccess();
     loadUsers();
-    
-    
     let nameFilterTimeout;
     const nameInput = document.getElementById('filterUserName');
     if (nameInput) {
@@ -21,8 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500); 
         });
     }
-    
-    
     const roleSelect = document.getElementById('filterUserRole');
     if (roleSelect) {
         roleSelect.addEventListener('change', function() {
@@ -30,33 +22,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
 async function checkAdminAccess() {
-    
-    
     if (!requireAuth()) {
         return;
     }
 }
-
 async function loadUsers() {
     try {
         const headers = getApiHeaders();
-        
-        
         const nameFilter = document.getElementById('filterUserName')?.value || '';
         const url = nameFilter 
             ? `/api/admin/users?name=${encodeURIComponent(nameFilter)}`
             : '/api/admin/users';
-        
         const response = await fetch(url, {
             headers: headers
         });
-
         if (!response.ok) {
             throw new Error('Error al cargar usuarios');
         }
-
         const data = await response.json();
         allUsers = data.users || [];
         applyFilters(); 
@@ -68,16 +51,13 @@ async function loadUsers() {
         }
     }
 }
-
 function renderUsers(users) {
     const tbody = document.getElementById('usersTableBody');
     if (!tbody) return;
-
     if (users.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay usuarios registrados</td></tr>';
         return;
     }
-
     tbody.innerHTML = users.map(user => {
         const date = new Date(user.created_at);
         const formattedDate = date.toLocaleDateString('es-ES', {
@@ -85,12 +65,9 @@ function renderUsers(users) {
             month: 'short',
             day: 'numeric'
         });
-
         const roleBadge = user.role === 'admin' 
             ? '<span class="badge bg-danger">Administrador</span>'
             : '<span class="badge bg-primary">Usuario</span>';
-
-        
         let userId = 'N/A';
         if (user.id) {
             userId = typeof user.id === 'string' ? user.id : (user.id.$oid || user.id.toString());
@@ -98,7 +75,6 @@ function renderUsers(users) {
             userId = typeof user._id === 'string' ? user._id : (user._id.$oid || user._id.toString());
         }
         const shortId = userId !== 'N/A' && userId.length > 10 ? userId.substring(0, 10) + '...' : userId;
-
         return `
             <tr>
                 <td><code>${shortId}</code></td>
@@ -121,26 +97,21 @@ function renderUsers(users) {
         `;
     }).join('');
 }
-
 async function showUserDetails(userId) {
     try {
         const headers = getApiHeaders();
         const response = await fetch(`/api/admin/users/${userId}`, {
             headers: headers
         });
-
         if (!response.ok) {
             alert('Error al cargar detalles del usuario');
             return;
         }
-
         const user = await response.json();
         const modalContent = document.getElementById('userDetailsContent');
-        
         const dateOfBirth = user.date_of_birth 
             ? new Date(user.date_of_birth).toLocaleDateString('es-ES')
             : 'No especificada';
-        
         const createdDate = new Date(user.created_at).toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'long',
@@ -148,7 +119,6 @@ async function showUserDetails(userId) {
             hour: '2-digit',
             minute: '2-digit'
         });
-
         modalContent.innerHTML = `
             <div class="row">
                 <div class="col-md-6">
@@ -175,7 +145,6 @@ async function showUserDetails(userId) {
                 </div>
             </div>
         `;
-
         const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
         modal.show();
     } catch (error) {
@@ -183,15 +152,12 @@ async function showUserDetails(userId) {
         alert('Error al cargar detalles del usuario');
     }
 }
-
 async function toggleUserRole(userId, currentRole) {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     const confirmMessage = `¿Estás seguro de cambiar el rol de este usuario a ${newRole === 'admin' ? 'Administrador' : 'Usuario'}?`;
-    
     if (!confirm(confirmMessage)) {
         return;
     }
-
     try {
         const headers = getApiHeaders();
         const response = await fetch(`/api/admin/users/${userId}/role`, {
@@ -202,7 +168,6 @@ async function toggleUserRole(userId, currentRole) {
             },
             body: JSON.stringify({ role: newRole })
         });
-
         if (response.ok) {
             alert('Rol actualizado correctamente');
             loadUsers();
@@ -215,19 +180,11 @@ async function toggleUserRole(userId, currentRole) {
         alert('Error al actualizar el rol');
     }
 }
-
 function applyFilters() {
     const role = document.getElementById('filterUserRole')?.value || '';
-    
-    
     let filteredUsers = [...allUsers];
-    
-    
     if (role) {
         filteredUsers = filteredUsers.filter(user => user.role === role);
     }
-    
-    
     renderUsers(filteredUsers);
 }
-

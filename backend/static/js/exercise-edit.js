@@ -1,8 +1,5 @@
-
-
 let exerciseId = null;
 let currentExercise = null;
-
 function addStep(stepText = '') {
     const container = document.getElementById('stepsContainer');
     const stepCount = container.children.length + 1;
@@ -16,25 +13,20 @@ function addStep(stepText = '') {
     `;
     container.appendChild(stepDiv);
 }
-
 function removeStep(button) {
     button.parentElement.remove();
 }
-
 function showError(message) {
     const errorDiv = document.getElementById('errorMessage');
     errorDiv.textContent = message;
     errorDiv.classList.remove('d-none');
 }
-
 function hideError() {
     const errorDiv = document.getElementById('errorMessage');
     errorDiv.classList.add('d-none');
 }
-
 async function loadExercise() {
     exerciseId = window.location.pathname.split('/').slice(-2, -1)[0] || window.location.pathname.split('/').pop();
-    
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/exercises/${exerciseId}`, {
@@ -42,11 +34,9 @@ async function loadExercise() {
                 'Authorization': 'Bearer ' + token
             }
         });
-
         if (!response.ok) {
             throw new Error('Ejercicio no encontrado');
         }
-
         currentExercise = await response.json();
         populateForm(currentExercise);
     } catch (error) {
@@ -54,7 +44,6 @@ async function loadExercise() {
         showError(error.message || 'Error al cargar el ejercicio');
     }
 }
-
 function populateForm(exercise) {
     document.getElementById('name').value = exercise.name || '';
     document.getElementById('description').value = exercise.description || '';
@@ -62,11 +51,8 @@ function populateForm(exercise) {
     document.getElementById('muscle_group').value = exercise.muscle_group || '';
     document.getElementById('difficulty').value = exercise.difficulty || '';
     document.getElementById('media_url').value = exercise.media_url || '';
-
-    
     const stepsContainer = document.getElementById('stepsContainer');
     stepsContainer.innerHTML = '';
-    
     if (exercise.steps && exercise.steps.length > 0) {
         exercise.steps.forEach(step => {
             addStep(step);
@@ -74,20 +60,15 @@ function populateForm(exercise) {
     } else {
         addStep();
     }
-
-    
     document.getElementById('loadingSpinner').classList.add('d-none');
     document.getElementById('exerciseForm').classList.remove('d-none');
 }
-
 document.getElementById('exerciseForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     hideError();
-    
     const steps = Array.from(document.querySelectorAll('.step-input'))
         .map(input => input.value)
         .filter(value => value.trim() !== '');
-
     const exerciseData = {
         name: document.getElementById('name').value,
         description: document.getElementById('description').value,
@@ -97,7 +78,6 @@ document.getElementById('exerciseForm').addEventListener('submit', async (e) => 
         media_url: document.getElementById('media_url').value,
         steps: steps
     };
-
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/exercises/${exerciseId}`, {
@@ -108,7 +88,6 @@ document.getElementById('exerciseForm').addEventListener('submit', async (e) => 
             },
             body: JSON.stringify(exerciseData)
         });
-
         if (response.ok) {
             window.location.href = `/exercises/${exerciseId}`;
         } else {
@@ -120,6 +99,4 @@ document.getElementById('exerciseForm').addEventListener('submit', async (e) => 
         console.error('Error:', error);
     }
 });
-
 document.addEventListener('DOMContentLoaded', loadExercise);
-

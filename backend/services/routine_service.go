@@ -1,18 +1,14 @@
 package services
-
 import (
 	"errors"
 	"fmt"
 	"strings"
 	"time"
-
 	"backend/dto"
 	"backend/models"
 	"backend/repositories"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
 type RoutineServiceInterface interface {
 	CreateRoutine(ownerID string, input dto.RoutineRequest) (dto.RoutineResponse, error)
 	GetRoutines(ownerID string, name string) ([]dto.RoutineResponse, error)
@@ -21,13 +17,11 @@ type RoutineServiceInterface interface {
 	DeleteRoutine(ownerID string, routineID string) error
 	DuplicateRoutine(ownerID string, sourceRoutineID string, newName string) (string, error)
 }
-
 type RoutineService struct {
 	repo         repositories.RoutineRepositoryInterface
 	exerciseRepo repositories.ExerciseRepositoryInterface
 	userRepo     repositories.UserRepositoryInterface
 }
-
 func NewRoutineService(repo repositories.RoutineRepositoryInterface, exerciseRepo repositories.ExerciseRepositoryInterface, userRepo repositories.UserRepositoryInterface) *RoutineService {
 	return &RoutineService{
 		repo:         repo,
@@ -35,7 +29,6 @@ func NewRoutineService(repo repositories.RoutineRepositoryInterface, exerciseRep
 		userRepo:     userRepo,
 	}
 }
-
 func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineRequest) (dto.RoutineResponse, error) {
 	if ownerID == "" {
 		return dto.RoutineResponse{}, errors.New("ownerID requerido")
@@ -75,7 +68,6 @@ func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineRequest)
 			Weight:     e.Weight,
 		})
 	}
-
 	res, err := s.repo.CreateRoutine(routine)
 	if err != nil {
 		return dto.RoutineResponse{}, err
@@ -86,7 +78,6 @@ func (s *RoutineService) CreateRoutine(ownerID string, input dto.RoutineRequest)
 	}
 	return dto.RoutineResponse{}, nil
 }
-
 func (s *RoutineService) GetRoutines(ownerID string, name string) ([]dto.RoutineResponse, error) {
 	if ownerID == "" {
 		return nil, errors.New("ownerID requerido")
@@ -105,7 +96,6 @@ func (s *RoutineService) GetRoutines(ownerID string, name string) ([]dto.Routine
 	}
 	return out, nil
 }
-
 func (s *RoutineService) GetRoutineByID(id string) (dto.RoutineResponse, error) {
 	m, err := s.repo.GetRoutineByID(id)
 	if err != nil {
@@ -113,7 +103,6 @@ func (s *RoutineService) GetRoutineByID(id string) (dto.RoutineResponse, error) 
 	}
 	return s.convertModelToDTOWithExerciseNames(m), nil
 }
-
 func (s *RoutineService) UpdateRoutine(ownerID string, routineID string, input dto.RoutineRequest) (dto.RoutineResponse, error) {
 	existing, err := s.repo.GetRoutineByID(routineID)
 	if err != nil {
@@ -162,7 +151,6 @@ func (s *RoutineService) UpdateRoutine(ownerID string, routineID string, input d
 	}
 	return s.convertModelToDTOWithExerciseNames(updated), nil
 }
-
 func (s *RoutineService) DeleteRoutine(ownerID string, routineID string) error {
 	existing, err := s.repo.GetRoutineByID(routineID)
 	if err != nil {
@@ -178,7 +166,6 @@ func (s *RoutineService) DeleteRoutine(ownerID string, routineID string) error {
 	_, err = s.repo.DeleteRoutine(existing.ID)
 	return err
 }
-
 func (s *RoutineService) DuplicateRoutine(ownerID string, sourceRoutineID string, newName string) (string, error) {
 	if sourceRoutineID == "" {
 		return "", errors.New("sourceRoutineID requerido")
@@ -226,7 +213,6 @@ func (s *RoutineService) DuplicateRoutine(ownerID string, sourceRoutineID string
 	}
 	return "", nil
 }
-
 func validateRoutineEntries(entries []dto.RoutineExcerciseList) error {
 	if len(entries) == 0 {
 		return errors.New("la rutina debe contener al menos un ejercicio")
@@ -255,7 +241,6 @@ func validateRoutineEntries(entries []dto.RoutineExcerciseList) error {
 	}
 	return nil
 }
-
 func (s *RoutineService) verifyExercisesExist(ids []primitive.ObjectID) error {
 	if len(ids) == 0 {
 		return nil
@@ -284,12 +269,10 @@ func (s *RoutineService) verifyExercisesExist(ids []primitive.ObjectID) error {
 	}
 	return nil
 }
-
 func (s *RoutineService) convertModelToDTOWithExerciseNames(routine models.Routine) dto.RoutineResponse {
 	entries := make([]dto.RoutineExcerciseList, len(routine.Entries))
 	for i, entry := range routine.Entries {
 		exerciseName := ""
-
 		if !entry.ExerciseID.IsZero() {
 			exercise, err := s.exerciseRepo.GetExerciseByID(entry.ExerciseID.Hex())
 			if err == nil && !exercise.ID.IsZero() {
@@ -305,7 +288,6 @@ func (s *RoutineService) convertModelToDTOWithExerciseNames(routine models.Routi
 			Weight:       entry.Weight,
 		}
 	}
-
 	ownerName := ""
 	if s.userRepo != nil && !routine.OwnerID.IsZero() {
 		user, err := s.userRepo.GetUserByID(routine.OwnerID.Hex())
@@ -313,7 +295,6 @@ func (s *RoutineService) convertModelToDTOWithExerciseNames(routine models.Routi
 			ownerName = user.Name
 		}
 	}
-
 	return dto.RoutineResponse{
 		ID:          routine.ID.Hex(),
 		UserID:      routine.OwnerID.Hex(),

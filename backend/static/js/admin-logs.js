@@ -1,54 +1,40 @@
-
-
 document.addEventListener('DOMContentLoaded', function() {
     if (!requireAuth()) {
         return;
     }
-    
     checkAdminAccess();
     loadLogs();
 });
-
 async function checkAdminAccess() {
-    
-    
     if (!requireAuth()) {
         return;
     }
 }
-
 async function loadLogs() {
     try {
         const headers = getApiHeaders();
         const response = await fetch('/api/admin/logs', {
             headers: headers
         });
-
         if (!response.ok) {
-            
             renderMockLogs();
             return;
         }
-
         const data = await response.json();
         const logs = data.logs || [];
         renderLogs(logs);
     } catch (error) {
         console.error('Error loading logs:', error);
-        
         renderMockLogs();
     }
 }
-
 function renderLogs(logs) {
     const tbody = document.getElementById('logsTableBody');
     if (!tbody) return;
-
     if (logs.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay logs registrados</td></tr>';
         return;
     }
-
     tbody.innerHTML = logs.map(log => {
         const date = new Date(log.timestamp || log.created_at);
         const formattedDate = date.toLocaleDateString('es-ES', {
@@ -59,10 +45,8 @@ function renderLogs(logs) {
             minute: '2-digit',
             second: '2-digit'
         });
-
         const levelBadge = getLevelBadge(log.level || 'info');
         const typeBadge = getTypeBadge(log.type || 'general');
-
         return `
             <tr>
                 <td>${formattedDate}</td>
@@ -79,9 +63,7 @@ function renderLogs(logs) {
         `;
     }).join('');
 }
-
 function renderMockLogs() {
-    
     const mockLogs = [
         {
             timestamp: new Date().toISOString(),
@@ -116,10 +98,8 @@ function renderMockLogs() {
             details: 'Entrenamiento registrado exitosamente'
         }
     ];
-
     renderLogs(mockLogs);
 }
-
 function getLevelBadge(level) {
     const badges = {
         'info': '<span class="badge bg-info">Info</span>',
@@ -129,7 +109,6 @@ function getLevelBadge(level) {
     };
     return badges[level] || badges['info'];
 }
-
 function getTypeBadge(type) {
     const badges = {
         'user': '<span class="badge bg-primary">Usuario</span>',
@@ -140,7 +119,6 @@ function getTypeBadge(type) {
     };
     return badges[type] || '<span class="badge bg-secondary">General</span>';
 }
-
 function showLogDetails(log) {
     const details = `
         <div class="card">
@@ -150,28 +128,21 @@ function showLogDetails(log) {
             </div>
         </div>
     `;
-
-    
     alert(`Detalles:\n${JSON.stringify(log, null, 2)}`);
 }
-
 function applyLogFilters() {
-    
     loadLogs();
 }
-
 async function clearLogs() {
     if (!confirm('¿Estás seguro de limpiar todos los logs? Esta acción no se puede deshacer.')) {
         return;
     }
-
     try {
         const headers = getApiHeaders();
         const response = await fetch('/api/admin/logs', {
             method: 'DELETE',
             headers: headers
         });
-
         if (response.ok) {
             alert('Logs limpiados correctamente');
             loadLogs();
@@ -183,4 +154,3 @@ async function clearLogs() {
         alert('Error al limpiar logs');
     }
 }
-

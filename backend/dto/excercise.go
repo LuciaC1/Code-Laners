@@ -1,5 +1,4 @@
 package dto
-
 type ExerciseRequest struct {
 	UserID      string   `json:"user_id"`
 	Name        string   `json:"name" binding:"required"`
@@ -10,7 +9,6 @@ type ExerciseRequest struct {
 	MediaURL    string   `json:"media_url,omitempty"`
 	Steps       []string `json:"steps,omitempty"`
 }
-
 type ExerciseResponse struct {
 	ID          string   `json:"id"`
 	UserID      string   `json:"user_id"`
@@ -22,11 +20,9 @@ type ExerciseResponse struct {
 	MediaURL    string   `json:"media_url,omitempty"`
 	Steps       []string `json:"steps,omitempty"`
 }
-
 type ExerciseListResponse struct {
 	Exercises []ExerciseResponse `json:"exercises"`
 }
-
 type ExerciseSearch struct {
 	Name        string `form:"name"`
 	Category    string `form:"category"`

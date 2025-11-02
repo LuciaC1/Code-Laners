@@ -1,5 +1,4 @@
 package dto
-
 type RoutineRequest struct {
 	UserID      string                 `json:"user_id"`
 	Name        string                 `json:"name" binding:"required"`
@@ -7,7 +6,6 @@ type RoutineRequest struct {
 	Description string                 `json:"description,omitempty"`
 	IsPublic    bool                   `json:"is_public"`
 }
-
 type RoutineResponse struct {
 	ID          string                 `json:"id"`
 	UserID      string                 `json:"user_id"`
@@ -17,7 +15,6 @@ type RoutineResponse struct {
 	Description string                 `json:"description,omitempty"`
 	IsPublic    bool                   `json:"is_public"`
 }
-
 type RoutineExcerciseList struct {
 	ExerciseID   string  `json:"exercise_id" binding:"required"`
 	ExerciseName string  `json:"exercise_name,omitempty"`

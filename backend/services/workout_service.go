@@ -1,16 +1,12 @@
 package services
-
 import (
 	"errors"
 	"time"
-
 	"backend/dto"
 	"backend/models"
 	"backend/repositories"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
 type WorkoutServiceInterface interface {
 	GetWorkouts(userID string) ([]dto.WorkoutDTO, error)
 	GetWorkoutByID(id string) (dto.WorkoutDTO, error)
@@ -18,19 +14,16 @@ type WorkoutServiceInterface interface {
 	UpdateWorkout(input dto.WorkoutDTO) error
 	DeleteWorkout(id string) error
 }
-
 type WorkoutService struct {
 	repo        repositories.WorkoutRepositoryInterface
 	routineRepo repositories.RoutineRepositoryInterface
 }
-
 func NewWorkoutService(repo repositories.WorkoutRepositoryInterface, routineRepo repositories.RoutineRepositoryInterface) *WorkoutService {
 	return &WorkoutService{
 		repo:        repo,
 		routineRepo: routineRepo,
 	}
 }
-
 func (s *WorkoutService) GetWorkouts(userID string) ([]dto.WorkoutDTO, error) {
 	if userID == "" {
 		return nil, errors.New("userID requerido")
@@ -49,7 +42,6 @@ func (s *WorkoutService) GetWorkouts(userID string) ([]dto.WorkoutDTO, error) {
 	}
 	return dtos, nil
 }
-
 func (s *WorkoutService) GetWorkoutByID(id string) (dto.WorkoutDTO, error) {
 	m, err := s.repo.GetWorkoutByID(id)
 	if err != nil {
@@ -57,7 +49,6 @@ func (s *WorkoutService) GetWorkoutByID(id string) (dto.WorkoutDTO, error) {
 	}
 	return s.modelToDTO(m), nil
 }
-
 func (s *WorkoutService) CreateWorkout(input dto.WorkoutDTO) (string, error) {
 	if input.UserID == "" {
 		return "", errors.New("user_id requerido")
@@ -66,7 +57,6 @@ func (s *WorkoutService) CreateWorkout(input dto.WorkoutDTO) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	var rid primitive.ObjectID
 	if input.RoutineID != "" {
 		rid, err = primitive.ObjectIDFromHex(input.RoutineID)
@@ -74,7 +64,6 @@ func (s *WorkoutService) CreateWorkout(input dto.WorkoutDTO) (string, error) {
 			return "", err
 		}
 	}
-
 	workout := models.Workout{
 		ID:                primitive.NewObjectID(),
 		UserID:            uid,
@@ -85,7 +74,6 @@ func (s *WorkoutService) CreateWorkout(input dto.WorkoutDTO) (string, error) {
 		EstimatedCalories: input.EstimatedCalories,
 		Notes:             input.Notes,
 	}
-
 	res, err := s.repo.CreateWorkout(workout)
 	if err != nil {
 		return "", err
@@ -98,7 +86,6 @@ func (s *WorkoutService) CreateWorkout(input dto.WorkoutDTO) (string, error) {
 	}
 	return "", nil
 }
-
 func (s *WorkoutService) UpdateWorkout(input dto.WorkoutDTO) error {
 	if input.ID.IsZero() {
 		return errors.New("id requerido para actualizar")
@@ -118,7 +105,6 @@ func (s *WorkoutService) UpdateWorkout(input dto.WorkoutDTO) error {
 			return err
 		}
 	}
-
 	workout := models.Workout{
 		ID:                input.ID,
 		UserID:            uid,
@@ -129,11 +115,9 @@ func (s *WorkoutService) UpdateWorkout(input dto.WorkoutDTO) error {
 		EstimatedCalories: input.EstimatedCalories,
 		Notes:             input.Notes,
 	}
-
 	_, err = s.repo.UpdateWorkout(workout)
 	return err
 }
-
 func (s *WorkoutService) DeleteWorkout(id string) error {
 	if id == "" {
 		return errors.New("id requerido")
@@ -145,7 +129,6 @@ func (s *WorkoutService) DeleteWorkout(id string) error {
 	_, err = s.repo.DeleteWorkout(objID)
 	return err
 }
-
 func (s *WorkoutService) modelToDTO(m models.Workout) dto.WorkoutDTO {
 	var uidHex string
 	if !m.UserID.IsZero() {
@@ -155,7 +138,6 @@ func (s *WorkoutService) modelToDTO(m models.Workout) dto.WorkoutDTO {
 	if !m.RoutineID.IsZero() {
 		ridHex = m.RoutineID.Hex()
 	}
-
 	routineName := ""
 	if s.routineRepo != nil && !m.RoutineID.IsZero() {
 		routine, err := s.routineRepo.GetRoutineByID(ridHex)
@@ -163,7 +145,6 @@ func (s *WorkoutService) modelToDTO(m models.Workout) dto.WorkoutDTO {
 			routineName = routine.Name
 		}
 	}
-
 	return dto.WorkoutDTO{
 		ID:                m.ID,
 		UserID:            uidHex,

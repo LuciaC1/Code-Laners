@@ -1,5 +1,3 @@
-
-
 async function loadRoutines() {
     try {
         const token = localStorage.getItem('token');
@@ -16,12 +14,9 @@ async function loadRoutines() {
             '<div class="col-12"><div class="alert alert-danger">Error al cargar rutinas</div></div>';
     }
 }
-
 function renderRoutines(routines) {
     const container = document.getElementById('routinesContainer');
     container.innerHTML = '';
-    
-    
     const userStr = localStorage.getItem('user');
     let currentUserId = null;
     if (userStr) {
@@ -32,7 +27,6 @@ function renderRoutines(routines) {
             console.error('Error parsing user:', e);
         }
     }
-    
     if (routines.length === 0) {
         container.innerHTML = `
             <div class="col-12">
@@ -44,7 +38,6 @@ function renderRoutines(routines) {
         `;
         return;
     }
-
     routines.forEach(routine => {
         const isOwner = currentUserId && routine.user_id === currentUserId;
         const card = document.createElement('div');
@@ -82,10 +75,8 @@ function renderRoutines(routines) {
         container.appendChild(card);
     });
 }
-
 async function deleteRoutine(id) {
     if (!confirm('¿Estás seguro de eliminar esta rutina?')) return;
-
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/routines/${id}`, {
@@ -94,7 +85,6 @@ async function deleteRoutine(id) {
                 'Authorization': 'Bearer ' + token
             }
         });
-
         if (response.ok) {
             loadRoutines();
         } else {
@@ -104,35 +94,26 @@ async function deleteRoutine(id) {
         alert('Error al eliminar la rutina');
     }
 }
-
 async function duplicateRoutine(id) {
     if (!confirm('¿Deseas duplicar esta rutina?')) return;
-
     try {
         const token = localStorage.getItem('token');
-        
-        
         const getResponse = await fetch(`/api/routines/${id}`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
         });
-
         if (!getResponse.ok) {
             alert('Error al obtener la rutina');
             return;
         }
-
         const routine = await getResponse.json();
-        
-        
         const newRoutine = {
             name: `${routine.name} (Copia)`,
             description: routine.description || '',
             exercises: routine.exercises || [],
             is_public: false
         };
-
         const createResponse = await fetch('/api/routines', {
             method: 'POST',
             headers: {
@@ -141,7 +122,6 @@ async function duplicateRoutine(id) {
             },
             body: JSON.stringify(newRoutine)
         });
-
         if (createResponse.ok) {
             const newRoutineData = await createResponse.json();
             alert('Rutina duplicada correctamente');
@@ -155,6 +135,4 @@ async function duplicateRoutine(id) {
         console.error('Error:', error);
     }
 }
-
 document.addEventListener('DOMContentLoaded', loadRoutines);
-

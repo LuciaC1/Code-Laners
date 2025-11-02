@@ -1,11 +1,8 @@
 package dto
-
 import (
 	"time"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
 type User struct {
 	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name         string             `bson:"name" json:"name"`
@@ -20,7 +17,6 @@ type User struct {
 	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt    time.Time          `bson:"updated_at" json:"updated_at"`
 }
-
 type RegisterRequest struct {
 	Name        string   `json:"name" binding:"required,min=2,max=100"`
 	Email       string   `json:"email" binding:"required,email"`
@@ -31,7 +27,6 @@ type RegisterRequest struct {
 	Level       string   `json:"level,omitempty"`
 	Goals       []string `json:"goals,omitempty"`
 }
-
 type RegisterResponse struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
@@ -44,7 +39,6 @@ type RegisterResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
-
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
@@ -57,7 +51,6 @@ type UpdateUserRequest struct {
 	Level  string   `json:"level,omitempty"`
 	Goals  []string `json:"goals,omitempty"`
 }
-
 type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" binding:"required"`
 	NewPassword string `json:"new_password" binding:"required,min=6"`

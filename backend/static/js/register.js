@@ -1,40 +1,27 @@
-
 document.addEventListener('DOMContentLoaded', function() {
     const registerForm = document.getElementById('registerForm');
     const errorMessage = document.getElementById('errorMessage');
     const successMessage = document.getElementById('successMessage');
-
     if (registerForm) {
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            
             errorMessage.classList.add('d-none');
             successMessage.classList.add('d-none');
-
-            
             const formData = new FormData(registerForm);
-            
-            
             const goals = [];
             const goalCheckboxes = registerForm.querySelectorAll('input[name="goals"]:checked');
             goalCheckboxes.forEach(checkbox => {
                 goals.push(checkbox.value);
             });
-
-            
             const requestData = {
                 name: formData.get('name'),
                 email: formData.get('email'),
                 password: formData.get('password'),
                 date_of_birth: formData.get('date_of_birth')
             };
-
-            
             const weight = formData.get('weight');
             const height = formData.get('height');
             const level = formData.get('level');
-
             if (weight && weight.trim() !== '') {
                 requestData.weight = parseFloat(weight);
             }
@@ -47,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (goals.length > 0) {
                 requestData.goals = goals;
             }
-
             try {
                 const response = await fetch('/api/register', {
                     method: 'POST',
@@ -56,15 +42,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify(requestData)
                 });
-
                 const data = await response.json();
-
                 if (response.ok) {
                     successMessage.textContent = 'Registro exitoso. Redirigiendo al login...';
                     successMessage.classList.remove('d-none');
                     registerForm.reset();
-                    
-                    
                     setTimeout(() => {
                         window.location.href = '/login';
                     }, 2000);
@@ -80,4 +62,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-

@@ -15,9 +15,7 @@ type ExerciseHandler struct {
 func NewExerciseHandler(service services.ExerciseInterface) *ExerciseHandler {
 	return &ExerciseHandler{service: service}
 }
-
 func (h *ExerciseHandler) GetExercise(c *gin.Context) {
-
 	if id := c.Param("id"); id != "" {
 		exercise, err := h.service.GetExerciseByID(id)
 		if err != nil {
@@ -27,29 +25,24 @@ func (h *ExerciseHandler) GetExercise(c *gin.Context) {
 		c.JSON(http.StatusOK, exercise)
 		return
 	}
-
 	var search dto.ExerciseSearch
 	if err := c.ShouldBindQuery(&search); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	exercises, err := h.service.GetExercises(search.Name, search.Category, search.MuscleGroup)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch exercises"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"exercises": exercises})
 }
-
 func (h *ExerciseHandler) CreateExercise(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
-
 	var exerciseReq dto.ExerciseRequest
 	if err := c.ShouldBindJSON(&exerciseReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -61,17 +54,14 @@ func (h *ExerciseHandler) CreateExercise(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create exercise"})
 		return
 	}
-
 	c.JSON(http.StatusCreated, exercise)
 }
-
 func (h *ExerciseHandler) UpdateExercise(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
-
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing exercise ID"})
@@ -88,23 +78,19 @@ func (h *ExerciseHandler) UpdateExercise(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update exercise"})
 		return
 	}
-
 	c.JSON(http.StatusOK, exercise)
 }
-
 func (h *ExerciseHandler) DeleteExercise(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
-
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing exercise ID"})
 		return
 	}
-
 	err := h.service.DeleteExercise(userID.(string), id)
 	if err != nil {
 		if err.Error() == "unauthorized: cannot delete exercise you do not own" {
@@ -114,6 +100,5 @@ func (h *ExerciseHandler) DeleteExercise(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "Exercise deleted successfully"})
 }

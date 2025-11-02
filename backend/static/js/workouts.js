@@ -1,5 +1,3 @@
-
-
 async function loadWorkouts() {
     try {
         const token = localStorage.getItem('token');
@@ -16,11 +14,9 @@ async function loadWorkouts() {
             '<div class="col-12"><div class="alert alert-danger">Error al cargar entrenamientos</div></div>';
     }
 }
-
 function renderWorkouts(workouts) {
     const container = document.getElementById('workoutsContainer');
     container.innerHTML = '';
-    
     if (workouts.length === 0) {
         container.innerHTML = `
             <div class="col-12">
@@ -32,7 +28,6 @@ function renderWorkouts(workouts) {
         `;
         return;
     }
-
     workouts.forEach(workout => {
         const card = document.createElement('div');
         card.className = 'col-md-6 col-lg-4';
@@ -67,10 +62,8 @@ function renderWorkouts(workouts) {
         container.appendChild(card);
     });
 }
-
 async function deleteWorkout(id) {
     if (!confirm('¿Estás seguro de eliminar este entrenamiento?')) return;
-
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/workouts/${id}`, {
@@ -79,7 +72,6 @@ async function deleteWorkout(id) {
                 'Authorization': 'Bearer ' + token
             }
         });
-
         if (response.ok) {
             loadWorkouts();
         } else {
@@ -89,6 +81,4 @@ async function deleteWorkout(id) {
         alert('Error al eliminar el entrenamiento');
     }
 }
-
 document.addEventListener('DOMContentLoaded', loadWorkouts);
-
