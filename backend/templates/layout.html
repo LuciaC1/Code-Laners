@@ -88,6 +88,8 @@
             {{template "workout-detail" .}}
         {{else if eq .TemplateName "workout-create"}}
             {{template "workout-create" .}}
+        {{else if eq .TemplateName "profile"}}
+            {{template "profile" .}}
         {{end}}
     </main>
 
@@ -124,6 +126,8 @@
         <script src="/static/js/workout-detail.js"></script>
     {{else if eq .TemplateName "workout-create"}}
         <script src="/static/js/workout-create.js"></script>
+    {{else if eq .TemplateName "profile"}}
+        <script src="/static/js/profile.js"></script>
     {{end}}
 </body>
 </html>

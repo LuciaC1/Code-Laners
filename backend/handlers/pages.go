@@ -85,3 +85,10 @@ func WorkoutDetailPage(c *gin.Context) {
 		"Title":        "Detalle del Entrenamiento",
 	})
 }
+
+func ProfilePage(c *gin.Context) {
+	c.HTML(200, "layout", gin.H{
+		"TemplateName": "profile",
+		"Title":        "Mi Perfil",
+	})
+}

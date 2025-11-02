@@ -10,13 +10,29 @@ function updateAuthSection() {
     if (token) {
         // User is logged in - get user info from token if needed
         // For now, just show a generic user menu
+        // Get user info from localStorage if available
+        const userStr = localStorage.getItem('user');
+        let userName = 'Usuario';
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                userName = user.name || 'Usuario';
+            } catch (e) {
+                // Ignore parse errors
+            }
+        }
+
         authSection.innerHTML = `
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                     <i class="bi bi-person-circle me-1"></i>
-                    Usuario
+                    ${userName}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="/profile">
+                        <i class="bi bi-person me-2"></i>Perfil
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
                         <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
                     </a></li>

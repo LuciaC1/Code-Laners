@@ -1,0 +1,166 @@
+{{define "profile"}}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="bi bi-person-circle"></i> Mi Perfil</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab">
+                                <i class="bi bi-person"></i> Información Personal
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="physical-tab" data-bs-toggle="tab" data-bs-target="#physical" type="button" role="tab">
+                                <i class="bi bi-activity"></i> Datos Físicos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="goals-tab" data-bs-toggle="tab" data-bs-target="#goals" type="button" role="tab">
+                                <i class="bi bi-bullseye"></i> Objetivos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab">
+                                <i class="bi bi-lock"></i> Cambiar Contraseña
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="profileTabsContent">
+                        <!-- Información Personal Tab -->
+                        <div class="tab-pane fade show active" id="personal" role="tabpanel">
+                            <h5 class="mb-4">Información Personal</h5>
+                            <form id="personalInfoForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profileName" class="form-label">Nombre completo <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="profileName" name="name" required minlength="2" maxlength="100">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profileEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="profileEmail" name="email" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profileDateOfBirth" class="form-label">Fecha de Nacimiento</label>
+                                    <input type="date" class="form-control" id="profileDateOfBirth" name="date_of_birth" readonly>
+                                    <small class="form-text text-muted">La fecha de nacimiento no se puede modificar</small>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Guardar Cambios
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="personalInfoError" class="alert alert-danger d-none mt-3"></div>
+                            <div id="personalInfoSuccess" class="alert alert-success d-none mt-3"></div>
+                        </div>
+
+                        <!-- Datos Físicos Tab -->
+                        <div class="tab-pane fade" id="physical" role="tabpanel">
+                            <h5 class="mb-4">Datos Físicos</h5>
+                            <form id="physicalDataForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profileWeight" class="form-label">Peso (kg)</label>
+                                        <input type="number" class="form-control" id="profileWeight" name="weight" min="0" step="0.1">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profileHeight" class="form-label">Altura (cm)</label>
+                                        <input type="number" class="form-control" id="profileHeight" name="height" min="0" step="0.1">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="profileLevel" class="form-label">Nivel de Experiencia</label>
+                                    <select class="form-select" id="profileLevel" name="level">
+                                        <option value="">Selecciona tu nivel</option>
+                                        <option value="principiante">Principiante</option>
+                                        <option value="intermedio">Intermedio</option>
+                                        <option value="avanzado">Avanzado</option>
+                                    </select>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Guardar Cambios
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="physicalDataError" class="alert alert-danger d-none mt-3"></div>
+                            <div id="physicalDataSuccess" class="alert alert-success d-none mt-3"></div>
+                        </div>
+
+                        <!-- Objetivos Tab -->
+                        <div class="tab-pane fade" id="goals" role="tabpanel">
+                            <h5 class="mb-4">Objetivos de Fitness</h5>
+                            <form id="goalsForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Selecciona tus objetivos (puedes elegir varios)</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="profile-goal-lose-weight" name="goals" value="perder peso">
+                                        <label class="form-check-label" for="profile-goal-lose-weight">
+                                            Perder peso
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="profile-goal-gain-muscle" name="goals" value="ganar músculo">
+                                        <label class="form-check-label" for="profile-goal-gain-muscle">
+                                            Ganar músculo
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="profile-goal-maintain" name="goals" value="mantenerse">
+                                        <label class="form-check-label" for="profile-goal-maintain">
+                                            Mantenerse
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Guardar Objetivos
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="goalsError" class="alert alert-danger d-none mt-3"></div>
+                            <div id="goalsSuccess" class="alert alert-success d-none mt-3"></div>
+                        </div>
+
+                        <!-- Cambiar Contraseña Tab -->
+                        <div class="tab-pane fade" id="password" role="tabpanel">
+                            <h5 class="mb-4">Cambiar Contraseña</h5>
+                            <form id="changePasswordForm">
+                                <div class="mb-3">
+                                    <label for="oldPassword" class="form-label">Contraseña Actual <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="oldPassword" name="old_password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">Nueva Contraseña <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="newPassword" name="new_password" required minlength="6">
+                                    <small class="form-text text-muted">Mínimo 6 caracteres</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirmar Nueva Contraseña <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required minlength="6">
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-key"></i> Cambiar Contraseña
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="passwordError" class="alert alert-danger d-none mt-3"></div>
+                            <div id="passwordSuccess" class="alert alert-success d-none mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+

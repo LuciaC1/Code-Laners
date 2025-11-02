@@ -23,6 +23,7 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 	r.GET("/workouts", handlers.WorkoutsPage)
 	r.GET("/workouts/create", handlers.WorkoutCreatePage)
 	r.GET("/workouts/:id", handlers.WorkoutDetailPage)
+	r.GET("/profile", handlers.ProfilePage)
 
 	// API pública
 	api := r.Group("/api")
@@ -35,6 +36,11 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 	apiPrivate := r.Group("/api")
 	apiPrivate.Use(middleware.AuthMiddleware())
 	{
+		// User Profile
+		apiPrivate.GET("/me", userHandler.GetMe)
+		apiPrivate.PUT("/me", userHandler.UpdateMe)
+		apiPrivate.PUT("/me/password", userHandler.ChangePassword)
+
 		// Exercises
 		apiPrivate.GET("/exercises", exerciseHandler.GetExercise)
 		apiPrivate.GET("/exercises/:id", exerciseHandler.GetExercise)
