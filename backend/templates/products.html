@@ -1,0 +1,67 @@
+{{template "layout" .}}
+
+{{define "title"}}Productos - Ejemplo Web{{end}}
+
+{{define "products-content"}}
+<div class="container">
+    <div id="message"></div>
+    
+    <!-- Form Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="card-title mb-4" id="formTitle">
+                <i class="bi bi-plus-circle me-2"></i>Agregar Producto
+            </h2>
+            
+            <form id="productForm">
+                <input type="hidden" id="productId" name="id">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nombre" class="form-label">Nombre del Producto</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="tipo" class="form-label">Tipo de Producto</label>
+                        <input type="text" class="form-control" id="tipo" name="tipo" required>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Producto
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn" onclick="cancelEdit()" style="display: none;">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Products Section -->
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h2 class="card-title mb-4">
+                <i class="bi bi-list-ul me-2"></i>Mis Productos
+            </h2>
+            
+            <div id="productsContainer">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Cargando productos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts-products"}}
+
+<!-- Custom JS -->
+<script src="/static/js/products.js"></script>
+{{end}}

@@ -17,15 +17,15 @@ import (
 )
 
 type mockUserService struct {
-	registerFn func(req dto.RegisterRequest) (dto.RegisterRequest, error)
+	registerFn func(req dto.RegisterRequest) (dto.RegisterResponse, error)
 	loginFn    func(req dto.LoginRequest) (dto.User, error)
 }
 
-func (m *mockUserService) Register(req dto.RegisterRequest) (dto.RegisterRequest, error) {
+func (m *mockUserService) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
 	if m.registerFn != nil {
 		return m.registerFn(req)
 	}
-	return dto.RegisterRequest{}, nil
+	return dto.RegisterResponse{}, nil
 }
 func (m *mockUserService) Login(req dto.LoginRequest) (dto.User, error) {
 	if m.loginFn != nil {
@@ -71,9 +71,9 @@ func TestRegister_Success(t *testing.T) {
 	}
 
 	msvc := &mockUserService{
-		registerFn: func(req dto.RegisterRequest) (dto.RegisterRequest, error) {
+		registerFn: func(req dto.RegisterRequest) (dto.RegisterResponse, error) {
 
-			return dto.RegisterRequest{Email: mockedUser.Email}, nil
+			return dto.RegisterResponse{Email: mockedUser.Email}, nil
 		},
 	}
 

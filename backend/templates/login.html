@@ -1,0 +1,59 @@
+{{template "layout" .}}
+
+{{define "title"}}Login - FitTrack{{end}}
+
+{{define "login-content"}}
+    <div class="main-content-wrapper">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-sm-10 col-md-8 col-lg-5 col-xl-4">
+                    <div class="card shadow-lg">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <!-- Icono de mancuerna para el tema fitness -->
+                                <i class="bi bi-person-circle text-theme" style="font-size: 3rem;"></i>
+                                <h2 class="mt-3 mb-1 fw-bold">Acceso de Miembros</h2>
+                                <p class="text-muted">Inicia sesión en tu cuenta GymPulse</p>
+                            </div>
+                            
+                            <!-- Área de mensajes -->
+                            <div id="message" class="mb-4 d-none">
+                                <!-- Los mensajes se insertarán aquí por JavaScript -->
+                            </div>
+                            
+                            <!-- Formulario de Inicio de Sesión -->
+                            <form id="loginForm">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Correo Electrónico</label>
+                                    <input type="email" class="form-control" id="email" name="email" required placeholder="tu.correo@gympulse.com">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <!-- Botón principal con estilo 'warning' -->
+                                    <button type="submit" class="btn btn-warning btn-lg text-dark fw-bold" id="submitBtn">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Entrenar Ahora
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Sección de registro -->
+                            <div class="text-center mt-4">
+                                <p class="text-muted mb-0">¿Primera vez aquí?</p>
+                                <a href="/register" class="text-theme text-decoration-none fw-bold">Regístrate y comienza gratis</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}
+
+{{define "scripts-login"}}
+<script src="/static/js/login.js"></script>
+{{end}}

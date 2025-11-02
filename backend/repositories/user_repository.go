@@ -76,7 +76,7 @@ func (repository UserRepository) CreateUser(user models.User) (*mongo.InsertOneR
 	return result, err
 }
 
-func (repository UserRepository) UpdaterUser(user models.User) (*mongo.UpdateResult, error) {
+func (repository UserRepository) UpdateUser(user models.User) (*mongo.UpdateResult, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("users")
 
 	filter := bson.M{"_id": user.ID}

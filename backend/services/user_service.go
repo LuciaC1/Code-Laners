@@ -15,7 +15,7 @@ import (
 )
 
 type UserServiceInterface interface {
-	Register(req dto.RegisterRequest) (dto.RegisterRequest, error)
+	Register(req dto.RegisterRequest) (dto.RegisterResponse, error)
 	Login(req dto.LoginRequest) (dto.User, error)
 	GetUsers(name string) ([]dto.User, error)
 	GetUserByID(id string) (dto.User, error)
@@ -32,31 +32,31 @@ func NewUserService(repo repositories.UserRepositoryInterface) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) Register(req dto.RegisterRequest) (dto.User, error) {
+func (s *UserService) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
 	if req.Name == "" || req.Email == "" || req.Password == "" || req.DateOfBirth == "" {
-		return dto.User{}, errors.New("datos incompletos")
+		return dto.RegisterResponse{}, errors.New("datos incompletos")
 	}
 	if !isValidEmail(req.Email) {
-		return dto.User{}, errors.New("email inválido")
+		return dto.RegisterResponse{}, errors.New("email inválido")
 	}
 	dob, err := time.Parse(time.RFC3339, req.DateOfBirth)
 	if err != nil {
 		dob, err = time.Parse("2006-01-02", req.DateOfBirth)
 		if err != nil {
-			return dto.User{}, errors.New("date_of_birth formato inválido, use ISO")
+			return dto.RegisterResponse{}, errors.New("date_of_birth formato inválido, use ISO")
 		}
 	}
 	candidates, err := s.repo.GetUser("")
 	if err == nil {
 		for _, u := range candidates {
 			if u.Email == req.Email {
-				return dto.User{}, errors.New("email ya registrado")
+				return dto.RegisterResponse{}, errors.New("email ya registrado")
 			}
 		}
 	}
 	hash, err := auth.HashPassword(req.Password)
 	if err != nil {
-		return dto.User{}, err
+		return dto.RegisterResponse{}, err
 	}
 	now := time.Now()
 	user := models.User{
@@ -69,24 +69,35 @@ func (s *UserService) Register(req dto.RegisterRequest) (dto.User, error) {
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
-	if req.Weight != nil {
-		user.Weight = *req.Weight
+	if req.Weight != 0 {
+		user.Weight = req.Weight
 	}
-	if req.Height != nil {
-		user.Height = *req.Height
+	if req.Height != 0 {
+		user.Height = req.Height
 	}
 	user.Level = req.Level
 	user.Goals = req.Goals
 
 	res, err := s.repo.CreateUser(user)
 	if err != nil {
-		return dto.User{}, err
+		return dto.RegisterResponse{}, err
 	}
 	if res.InsertedID == nil {
-		return dto.User{}, errors.New("no se pudo crear el usuario")
+		return dto.RegisterResponse{}, errors.New("no se pudo crear el usuario")
 	}
 	user.PasswordHash = ""
-	return modelUserToDTO(user), nil
+	return dto.RegisterResponse{
+		ID:          user.ID.Hex(),
+		Name:        user.Name,
+		Email:       user.Email,
+		DateOfBirth: user.DateOfBirth,
+		Weight:      user.Weight,
+		Height:      user.Height,
+		Level:       user.Level,
+		Goals:       user.Goals,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+	}, nil
 
 }
 func (s *UserService) Login(req dto.LoginRequest) (dto.User, error) {

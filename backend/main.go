@@ -1,14 +1,12 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"backend/database"
 	"backend/handlers"
 	"backend/repositories"
 	"backend/routes"
 	"backend/services"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,32 +18,17 @@ func main() {
 	}
 	defer db.Disconnect()
 
-	exRepo := repositories.NewExerciseRepository(db)
-	rtRepo := repositories.NewRoutineRepository(db)
-	wkRepo := repositories.NewWorkoutRepository(db)
-
-	exSvc := services.NewExerciseService(exRepo)
-	rtSvc := services.NewRoutineService(rtRepo, exRepo)
-	wkSvc := services.NewWorkoutService(wkRepo)
-
-	// Handlers (según carpeta backend/handlers)
-	exHandler := handlers.NewExerciseHandler(exSvc)
-	rtHandler := handlers.NewRoutineHandler(rtSvc)
-	wkHandler := handlers.NewWorkoutHandler(wkSvc)
-
 	r := gin.Default()
 
-	// Templates y static (rutas relativas a la raíz del repo)
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/static", "./static")
-
-	// Ruta raíz que renderiza index.html (ajusta nombre si usas layout diferente)
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{})
-	})
-
-	// Registrar rutas con handlers instanciados (usar nil si no hay userHandler)
-	routes.SetupRoutes(r, nil, exHandler, rtHandler, wkHandler)
+	routes.SetupRoutes(
+		r,
+		handlers.NewUserHandler(services.NewUserService(repositories.NewUserRepository(db))),
+		handlers.NewExerciseHandler(services.NewExerciseService(repositories.NewExerciseRepository(db))),
+		handlers.NewRoutineHandler(services.NewRoutineService(repositories.NewRoutineRepository(db), repositories.NewExerciseRepository(db))),
+		handlers.NewWorkoutHandler(services.NewWorkoutService(repositories.NewWorkoutRepository(db))),
+	)
 
 	log.Println("Servidor iniciado en http://localhost:8080")
 	if err := r.Run(":8080"); err != nil {
