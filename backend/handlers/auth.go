@@ -54,11 +54,6 @@ func (handler *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	if !auth.CheckPasswordHash(req.Password, user.PasswordHash) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "credenciales inválidas"})
-		return
-	}
-
 	access, refresh, expiresIn, err := auth.GenerateToken(user.ID, user.Email, string(user.Role))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "no se pudieron generar tokens"})

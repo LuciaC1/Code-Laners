@@ -7,9 +7,33 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    // Check if login was successful
+    checkLoginSuccess();
+    
     loadUserProfile();
     setupForms();
 });
+
+function checkLoginSuccess() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'success') {
+        const successMessage = document.getElementById('loginSuccessMessage');
+        if (successMessage) {
+            successMessage.classList.remove('d-none');
+            
+            // Remove query parameter from URL without reloading
+            const url = new URL(window.location);
+            url.searchParams.delete('login');
+            window.history.replaceState({}, '', url);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(successMessage);
+                bsAlert.close();
+            }, 5000);
+        }
+    }
+}
 
 async function loadUserProfile() {
     try {

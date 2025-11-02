@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (loginForm) {
         loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            e.stopPropagation();
             
             // Hide previous messages
             errorMessage.classList.add('d-none');
@@ -38,8 +39,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         localStorage.setItem('user', JSON.stringify(data.user));
                     }
                     
-                    // Redirect to home
-                    window.location.href = '/';
+                    // Redirect to profile with success message
+                    window.location.href = '/profile?login=success';
                 } else {
                     errorMessage.textContent = data.error || 'Email o contraseña incorrectos';
                     errorMessage.classList.remove('d-none');
