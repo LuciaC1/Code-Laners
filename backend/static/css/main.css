@@ -1,21 +1,134 @@
-        body {
-            background-color: #f8f9fa; /* Fondo claro de Bootstrap */
-            min-height: 100vh;
-            display: flex; /* Habilita el layout flexbox en el cuerpo */
-            flex-direction: column; /* Apila los elementos (Header arriba, contenido abajo) */
-        }
-        .card {
-            border-radius: 1rem; /* Esquinas redondeadas */
-        }
-        /* Contenedor principal que ocupa el espacio restante y centra el formulario */
-        .main-content-wrapper {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
-        }
-        /* Asegura que el icono del formulario use el color temático (warning) */
-        .text-theme {
-            color: var(--bs-warning) !important;
-        }
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.card {
+    border-radius: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.main-content-wrapper {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.text-theme {
+    color: var(--bs-warning) !important;
+}
+
+/* Loading spinner styles */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Exercise card styles */
+.exercise-card {
+    transition: all 0.3s ease;
+}
+
+.exercise-card:hover {
+    border-color: var(--bs-primary);
+}
+
+/* Routine card styles */
+.routine-card {
+    transition: all 0.3s ease;
+}
+
+/* Workout card styles */
+.workout-card {
+    transition: all 0.3s ease;
+}
+
+/* Table styles */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.025);
+}
+
+/* Badge styles */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Button styles */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Form input styles */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Modal styles */
+.modal-content {
+    border-radius: 1rem;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Alert styles */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+}
+
+/* Footer styles */
+footer {
+    margin-top: auto;
+}
+
+/* Navigation styles */
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.nav-link {
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Step input container */
+#stepsContainer .input-group {
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-content-wrapper {
+        padding: 1rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}

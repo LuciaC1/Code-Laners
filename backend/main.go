@@ -19,9 +19,11 @@ func main() {
 	defer db.Disconnect()
 
 	r := gin.Default()
-
 	r.LoadHTMLGlob("templates/*")
+	// Archivos estáticos
 	r.Static("/static", "./static")
+
+	// Registrar rutas (delegado a routes.SetupRoutes)
 	routes.SetupRoutes(
 		r,
 		handlers.NewUserHandler(services.NewUserService(repositories.NewUserRepository(db))),

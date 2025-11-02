@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,7 +23,13 @@ func (mongoDB *MongoDB) GetClient() *mongo.Client {
 }
 
 func (mongoDB *MongoDB) Connect() error {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	// Usar variable de entorno si está disponible, sino usar valor por defecto
+	mongoURI := os.Getenv("MONGODB_URI")
+	if mongoURI == "" {
+		mongoURI = "mongodb://localhost:27017"
+	}
+
+	clientOptions := options.Client().ApplyURI(mongoURI)
 
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {

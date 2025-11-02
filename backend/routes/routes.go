@@ -12,7 +12,17 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 	r.GET("/", handlers.IndexPage)
 	r.GET("/login", handlers.LoginPage)
 	r.GET("/register", handlers.RegisterPage)
-	r.GET("/products", handlers.ProductsPage)
+
+	// Service HTML pages (may require authentication)
+	r.GET("/exercises", handlers.ExercisesPage)
+	r.GET("/exercises/create", handlers.ExerciseCreatePage)
+	r.GET("/exercises/:id", handlers.ExerciseDetailPage)
+	r.GET("/routines", handlers.RoutinesPage)
+	r.GET("/routines/create", handlers.RoutineCreatePage)
+	r.GET("/routines/:id", handlers.RoutineDetailPage)
+	r.GET("/workouts", handlers.WorkoutsPage)
+	r.GET("/workouts/create", handlers.WorkoutCreatePage)
+	r.GET("/workouts/:id", handlers.WorkoutDetailPage)
 
 	// API pública
 	api := r.Group("/api")
@@ -25,11 +35,25 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 	apiPrivate := r.Group("/api")
 	apiPrivate.Use(middleware.AuthMiddleware())
 	{
+		// Exercises
 		apiPrivate.GET("/exercises", exerciseHandler.GetExercise)
+		apiPrivate.GET("/exercises/:id", exerciseHandler.GetExercise)
 		apiPrivate.POST("/exercises", exerciseHandler.CreateExercise)
+		apiPrivate.PUT("/exercises/:id", exerciseHandler.UpdateExercise)
+		apiPrivate.DELETE("/exercises/:id", exerciseHandler.DeleteExercise)
+
+		// Routines
 		apiPrivate.GET("/routines", routineHandler.GetRoutines)
+		apiPrivate.GET("/routines/:id", routineHandler.GetRoutineByID)
 		apiPrivate.POST("/routines", routineHandler.CreateRoutine)
+		apiPrivate.PUT("/routines/:id", routineHandler.UpdateRoutine)
+		apiPrivate.DELETE("/routines/:id", routineHandler.DeleteRoutine)
+
+		// Workouts
 		apiPrivate.GET("/workouts", workoutHandler.GetWorkouts)
+		apiPrivate.GET("/workouts/:id", workoutHandler.GetWorkoutByID)
 		apiPrivate.POST("/workouts", workoutHandler.CreateWorkout)
+		apiPrivate.PUT("/workouts/:id", workoutHandler.UpdateWorkout)
+		apiPrivate.DELETE("/workouts/:id", workoutHandler.DeleteWorkout)
 	}
 }
