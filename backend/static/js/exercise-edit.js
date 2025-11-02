@@ -1,4 +1,4 @@
-// Exercise edit page functionality
+
 
 let exerciseId = null;
 let currentExercise = null;
@@ -63,7 +63,7 @@ function populateForm(exercise) {
     document.getElementById('difficulty').value = exercise.difficulty || '';
     document.getElementById('media_url').value = exercise.media_url || '';
 
-    // Populate steps
+    
     const stepsContainer = document.getElementById('stepsContainer');
     stepsContainer.innerHTML = '';
     
@@ -75,7 +75,7 @@ function populateForm(exercise) {
         addStep();
     }
 
-    // Show form and hide loading
+    
     document.getElementById('loadingSpinner').classList.add('d-none');
     document.getElementById('exerciseForm').classList.remove('d-none');
 }

@@ -150,7 +150,6 @@ func (s *UserService) UpdateUser(id string, req dto.UpdateUserRequest) error {
 		return errors.New("email inválido")
 	}
 
-	// Update fields only if they are provided
 	if req.Name != "" {
 		m.Name = req.Name
 	}
@@ -193,7 +192,6 @@ func (s *UserService) ChangePassword(id string, req dto.ChangePasswordRequest) e
 		return err
 	}
 
-	// Revocar todos los refresh tokens del usuario para forzar re-login
 	db := database.NewMongoDB()
 	refreshRepo := repositories.NewRefreshTokenRepository(db)
 	objID, err := primitive.ObjectIDFromHex(id)

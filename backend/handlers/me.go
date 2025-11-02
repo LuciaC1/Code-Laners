@@ -101,7 +101,7 @@ func (handler *UserHandler) ChangePassword(c *gin.Context) {
 }
 
 func (handler *UserHandler) GetAllUsers(c *gin.Context) {
-	// Get optional name filter from query
+
 	name := c.Query("name")
 
 	users, err := handler.service.GetUsers(name)
@@ -110,7 +110,6 @@ func (handler *UserHandler) GetAllUsers(c *gin.Context) {
 		return
 	}
 
-	// Remove password hash from all users before sending
 	for i := range users {
 		users[i].PasswordHash = ""
 	}

@@ -1,5 +1,5 @@
-// Statistics page functionality
-// Note: This uses Chart.js library - add it to layout.html or load it here
+
+
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!requireAuth()) {
@@ -16,7 +16,7 @@ async function loadStatistics() {
     try {
         const headers = getApiHeaders();
         
-        // Load workouts for statistics
+        
         const workoutsResponse = await fetch('/api/workouts', {
             headers: headers
         });
@@ -32,7 +32,7 @@ async function loadStatistics() {
         const workoutsData = await workoutsResponse.json();
         const workouts = workoutsData.workouts || [];
 
-        // Load routines
+        
         const routinesResponse = await fetch('/api/routines', {
             headers: headers
         });
@@ -48,11 +48,11 @@ async function loadStatistics() {
         const routinesData = await routinesResponse.json();
         const routines = routinesData.routines || [];
 
-        // Calculate statistics
+        
         calculateSummaryStats(workouts, routines);
         renderRecentWorkouts(workouts.slice(0, 10));
         
-        // Load Chart.js if not already loaded
+        
         if (typeof Chart === 'undefined') {
             loadChartLibrary().then(() => {
                 renderCharts(workouts, routines);
@@ -62,7 +62,7 @@ async function loadStatistics() {
         }
     } catch (error) {
         console.error('Error loading statistics:', error);
-        // Show error message to user
+        
         const tbody = document.getElementById('recentWorkoutsTable');
         if (tbody) {
             tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error al cargar estadísticas: ${error.message}</td></tr>`;
@@ -93,7 +93,7 @@ function renderFrequencyChart(workouts) {
     const ctx = document.getElementById('frequencyChart');
     if (!ctx) return;
 
-    // Group workouts by week
+    
     const weeklyData = {};
     workouts.forEach(workout => {
         const date = new Date(workout.completed_at);
@@ -139,7 +139,7 @@ function renderRoutinesChart(workouts) {
     const ctx = document.getElementById('routinesChart');
     if (!ctx) return;
 
-    // Count workouts by routine
+    
     const routineCounts = {};
     workouts.forEach(workout => {
         const routineName = workout.routine_name || 'Sin rutina';
@@ -174,7 +174,7 @@ function renderProgressChart(workouts) {
     const ctx = document.getElementById('progressChart');
     if (!ctx) return;
 
-    // Sort workouts by date
+    
     const sortedWorkouts = [...workouts].sort((a, b) => 
         new Date(a.completed_at) - new Date(b.completed_at)
     );

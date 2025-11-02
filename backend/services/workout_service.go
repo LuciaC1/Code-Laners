@@ -20,8 +20,8 @@ type WorkoutServiceInterface interface {
 }
 
 type WorkoutService struct {
-	repo         repositories.WorkoutRepositoryInterface
-	routineRepo  repositories.RoutineRepositoryInterface
+	repo        repositories.WorkoutRepositoryInterface
+	routineRepo repositories.RoutineRepositoryInterface
 }
 
 func NewWorkoutService(repo repositories.WorkoutRepositoryInterface, routineRepo repositories.RoutineRepositoryInterface) *WorkoutService {
@@ -155,8 +155,7 @@ func (s *WorkoutService) modelToDTO(m models.Workout) dto.WorkoutDTO {
 	if !m.RoutineID.IsZero() {
 		ridHex = m.RoutineID.Hex()
 	}
-	
-	// Get routine name if routine ID exists
+
 	routineName := ""
 	if s.routineRepo != nil && !m.RoutineID.IsZero() {
 		routine, err := s.routineRepo.GetRoutineByID(ridHex)
@@ -164,7 +163,7 @@ func (s *WorkoutService) modelToDTO(m models.Workout) dto.WorkoutDTO {
 			routineName = routine.Name
 		}
 	}
-	
+
 	return dto.WorkoutDTO{
 		ID:                m.ID,
 		UserID:            uidHex,
@@ -177,4 +176,3 @@ func (s *WorkoutService) modelToDTO(m models.Workout) dto.WorkoutDTO {
 		EstimatedCalories: m.EstimatedCalories,
 	}
 }
-

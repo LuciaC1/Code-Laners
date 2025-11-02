@@ -1,4 +1,4 @@
-// Register form handler
+
 document.addEventListener('DOMContentLoaded', function() {
     const registerForm = document.getElementById('registerForm');
     const errorMessage = document.getElementById('errorMessage');
@@ -8,21 +8,21 @@ document.addEventListener('DOMContentLoaded', function() {
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Hide previous messages
+            
             errorMessage.classList.add('d-none');
             successMessage.classList.add('d-none');
 
-            // Get form data
+            
             const formData = new FormData(registerForm);
             
-            // Collect checkbox values for goals
+            
             const goals = [];
             const goalCheckboxes = registerForm.querySelectorAll('input[name="goals"]:checked');
             goalCheckboxes.forEach(checkbox => {
                 goals.push(checkbox.value);
             });
 
-            // Prepare request data
+            
             const requestData = {
                 name: formData.get('name'),
                 email: formData.get('email'),
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 date_of_birth: formData.get('date_of_birth')
             };
 
-            // Add optional fields if provided
+            
             const weight = formData.get('weight');
             const height = formData.get('height');
             const level = formData.get('level');
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     successMessage.classList.remove('d-none');
                     registerForm.reset();
                     
-                    // Redirect to login after 2 seconds
+                    
                     setTimeout(() => {
                         window.location.href = '/login';
                     }, 2000);

@@ -32,7 +32,6 @@ func NewRoutineRepository(db database.DB) *RoutineRepository {
 func (repository RoutineRepository) GetRoutines(ownerID primitive.ObjectID, name string) ([]models.Routine, error) {
 	collection := repository.db.GetClient().Database("fitness_db").Collection("routines")
 
-	// Get user's routines OR public routines
 	filter := bson.M{
 		"$or": []bson.M{
 			{"owner_id": ownerID},

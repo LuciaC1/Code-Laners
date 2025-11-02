@@ -1,11 +1,11 @@
-// Admin dashboard functionality
+
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!requireAuth()) {
         return;
     }
     
-    // Check if user is admin
+    
     checkAdminAccess();
     loadDashboardData();
 });
@@ -14,8 +14,8 @@ let usersChart = null;
 let popularExercisesChart = null;
 
 async function checkAdminAccess() {
-    // El middleware del backend verifica el rol, así que solo verificamos autenticación
-    // Si el backend rechaza, manejará el error automáticamente
+    
+    
     if (!requireAuth()) {
         return;
     }
@@ -25,7 +25,7 @@ async function loadDashboardData() {
     try {
         const headers = getApiHeaders();
         
-        // Load all statistics
+        
         const [users, exercises, routines, workouts] = await Promise.all([
             fetch('/api/admin/users', { headers }).then(r => r.json()),
             fetch('/api/exercises', { headers }).then(r => r.json()),
@@ -38,10 +38,10 @@ async function loadDashboardData() {
         const routinesData = routines.routines || [];
         const workoutsData = workouts.workouts || [];
 
-        // Update summary cards
+        
         updateSummaryCards(usersData.length, exercisesData.length, routinesData.length, workoutsData.length);
 
-        // Render charts
+        
         if (typeof Chart !== 'undefined') {
             renderUsersChart(usersData);
             renderPopularExercisesChart(exercisesData, workoutsData);
@@ -52,7 +52,7 @@ async function loadDashboardData() {
             });
         }
 
-        // Render popular routines and recent activity
+        
         renderPopularRoutines(routinesData, workoutsData);
         renderRecentActivity(workoutsData, usersData);
     } catch (error) {
@@ -71,7 +71,7 @@ function renderUsersChart(users) {
     const ctx = document.getElementById('usersChart');
     if (!ctx) return;
 
-    // Group users by month
+    
     const monthlyData = {};
     users.forEach(user => {
         const date = new Date(user.created_at);
@@ -117,14 +117,14 @@ function renderPopularExercisesChart(exercises, workouts) {
     const ctx = document.getElementById('popularExercisesChart');
     if (!ctx) return;
 
-    // Count exercise usage (if workouts have exercise references)
+    
     const exerciseCounts = {};
     workouts.forEach(workout => {
-        // This would require workout data to include exercise IDs
-        // For now, we'll use a placeholder approach
+        
+        
     });
 
-    // Fallback: show exercises by category
+    
     const categoryCounts = {};
     exercises.forEach(exercise => {
         const category = exercise.category || 'Otros';
@@ -159,7 +159,7 @@ function renderPopularRoutines(routines, workouts) {
     const container = document.getElementById('popularRoutinesList');
     if (!container) return;
 
-    // Count workouts by routine
+    
     const routineCounts = {};
     workouts.forEach(workout => {
         const routineId = workout.routine_id;
@@ -168,7 +168,7 @@ function renderPopularRoutines(routines, workouts) {
         }
     });
 
-    // Sort routines by usage
+    
     const sortedRoutines = routines.map(r => ({
         ...r,
         usage: routineCounts[r.id] || 0
@@ -195,10 +195,10 @@ function renderRecentActivity(workouts, users) {
     const container = document.getElementById('recentActivityList');
     if (!container) return;
 
-    // Combine recent workouts and new users
+    
     const activities = [];
 
-    // Recent workouts (last 5)
+    
     workouts.slice(0, 5).forEach(workout => {
         activities.push({
             type: 'workout',
@@ -207,7 +207,7 @@ function renderRecentActivity(workouts, users) {
         });
     });
 
-    // Recent users (last 5)
+    
     users.slice(0, 5).forEach(user => {
         activities.push({
             type: 'user',
@@ -216,7 +216,7 @@ function renderRecentActivity(workouts, users) {
         });
     });
 
-    // Sort by date (most recent first)
+    
     activities.sort((a, b) => b.date - a.date).slice(0, 10);
 
     if (activities.length === 0) {

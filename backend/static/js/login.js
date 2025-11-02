@@ -1,4 +1,4 @@
-// Login form handler
+
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     const errorMessage = document.getElementById('errorMessage');
@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
             
-            // Hide previous messages
+            
             errorMessage.classList.add('d-none');
 
-            // Get form data
+            
             const formData = new FormData(loginForm);
             
             const requestData = {
@@ -31,20 +31,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 if (response.ok && data.accessToken) {
-                    // Save token to localStorage
+                    
                     localStorage.setItem('token', data.accessToken);
                     
-                    // Save user info if available
+                    
                     if (data.user) {
                         localStorage.setItem('user', JSON.stringify(data.user));
                     }
                     
-                    // Update navbar to hide login/register links (if function exists)
+                    
                     if (typeof updateNavbarAfterLogin === 'function') {
                         updateNavbarAfterLogin(data.user);
                     }
                     
-                    // Redirect to profile with success message
+                    
                     window.location.href = '/profile?login=success';
                 } else {
                     errorMessage.textContent = data.error || 'Email o contraseña incorrectos';

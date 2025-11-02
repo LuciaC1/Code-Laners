@@ -1,4 +1,4 @@
-// Exercise detail page functionality
+
 
 let currentExerciseId = null;
 let currentExercise = null;
@@ -23,7 +23,7 @@ async function loadExercise() {
         const exercise = await response.json();
         currentExercise = exercise;
         
-        // Check if user is admin (from token or user data)
+        
         checkUserRole();
         
         renderExercise(exercise);
@@ -35,7 +35,7 @@ async function loadExercise() {
 }
 
 function checkUserRole() {
-    // Try to get user role from localStorage
+    
     const userStr = localStorage.getItem('user');
     if (userStr) {
         try {
@@ -45,7 +45,7 @@ function checkUserRole() {
                 showAdminControls();
             }
         } catch (e) {
-            // Ignore parse errors
+            
         }
     }
 }
@@ -99,21 +99,21 @@ function renderExercise(exercise) {
 function isVideoUrl(url) {
     if (!url) return false;
     
-    // Check for video file extensions
+    
     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
     const urlLower = url.toLowerCase();
     
-    // Check file extension
+    
     if (videoExtensions.some(ext => urlLower.includes(ext))) {
         return true;
     }
     
-    // Check for YouTube URLs
+    
     if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
         return true;
     }
     
-    // Check for Vimeo URLs
+    
     if (urlLower.includes('vimeo.com')) {
         return true;
     }
@@ -124,11 +124,11 @@ function isVideoUrl(url) {
 function getYouTubeEmbedUrl(url) {
     let videoId = '';
     
-    // Handle youtu.be short URLs
+    
     if (url.includes('youtu.be/')) {
         videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
     }
-    // Handle youtube.com URLs
+    
     else if (url.includes('youtube.com')) {
         if (url.includes('v=')) {
             videoId = url.split('v=')[1].split('&')[0];
@@ -141,7 +141,7 @@ function getYouTubeEmbedUrl(url) {
 }
 
 function getVimeoEmbedUrl(url) {
-    // Extract Vimeo video ID
+    
     const match = url.match(/(?:vimeo\.com\/)(\d+)/);
     return match ? `https://player.vimeo.com/video/${match[1]}` : null;
 }
@@ -151,12 +151,12 @@ function renderMedia(mediaUrl, exerciseName) {
     const imageContainer = document.getElementById('exerciseImageContainer');
     const videoContainer = document.getElementById('exerciseVideoContainer');
     
-    // Clear previous content
+    
     imageContainer.innerHTML = '';
     videoContainer.innerHTML = '';
     
     if (isVideoUrl(mediaUrl)) {
-        // Handle YouTube
+        
         const youtubeEmbed = getYouTubeEmbedUrl(mediaUrl);
         if (youtubeEmbed) {
             videoContainer.innerHTML = `
@@ -171,7 +171,7 @@ function renderMedia(mediaUrl, exerciseName) {
                 </div>
             `;
         }
-        // Handle direct video files
+        
         else {
             videoContainer.innerHTML = `
                 <video class="w-100 rounded" controls>
@@ -185,7 +185,7 @@ function renderMedia(mediaUrl, exerciseName) {
         imageContainer.classList.add('d-none');
         videoContainer.classList.remove('d-none');
     } else {
-        // It's an image
+        
         imageContainer.innerHTML = `
             <img src="${mediaUrl}" class="img-fluid rounded" alt="${exerciseName || 'Imagen del ejercicio'}" style="max-height: 500px; object-fit: contain;">
         `;

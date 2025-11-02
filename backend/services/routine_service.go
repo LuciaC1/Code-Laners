@@ -285,12 +285,11 @@ func (s *RoutineService) verifyExercisesExist(ids []primitive.ObjectID) error {
 	return nil
 }
 
-// convertModelToDTOWithExerciseNames converts a Routine model to DTO and includes exercise names
 func (s *RoutineService) convertModelToDTOWithExerciseNames(routine models.Routine) dto.RoutineResponse {
 	entries := make([]dto.RoutineExcerciseList, len(routine.Entries))
 	for i, entry := range routine.Entries {
 		exerciseName := ""
-		// Get exercise name from repository
+
 		if !entry.ExerciseID.IsZero() {
 			exercise, err := s.exerciseRepo.GetExerciseByID(entry.ExerciseID.Hex())
 			if err == nil && !exercise.ID.IsZero() {
@@ -306,7 +305,7 @@ func (s *RoutineService) convertModelToDTOWithExerciseNames(routine models.Routi
 			Weight:       entry.Weight,
 		}
 	}
-	// Get owner name
+
 	ownerName := ""
 	if s.userRepo != nil && !routine.OwnerID.IsZero() {
 		user, err := s.userRepo.GetUserByID(routine.OwnerID.Hex())
@@ -314,7 +313,7 @@ func (s *RoutineService) convertModelToDTOWithExerciseNames(routine models.Routi
 			ownerName = user.Name
 		}
 	}
-	
+
 	return dto.RoutineResponse{
 		ID:          routine.ID.Hex(),
 		UserID:      routine.OwnerID.Hex(),

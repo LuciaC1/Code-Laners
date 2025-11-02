@@ -1,4 +1,4 @@
-// Routines list page functionality
+
 
 async function loadRoutines() {
     try {
@@ -21,7 +21,7 @@ function renderRoutines(routines) {
     const container = document.getElementById('routinesContainer');
     container.innerHTML = '';
     
-    // Get current user ID
+    
     const userStr = localStorage.getItem('user');
     let currentUserId = null;
     if (userStr) {
@@ -111,7 +111,7 @@ async function duplicateRoutine(id) {
     try {
         const token = localStorage.getItem('token');
         
-        // First, get the routine to duplicate
+        
         const getResponse = await fetch(`/api/routines/${id}`, {
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -125,7 +125,7 @@ async function duplicateRoutine(id) {
 
         const routine = await getResponse.json();
         
-        // Create a new routine with the same data but new name
+        
         const newRoutine = {
             name: `${routine.name} (Copia)`,
             description: routine.description || '',

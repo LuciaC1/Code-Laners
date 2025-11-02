@@ -10,12 +10,11 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandler *handlers.ExerciseHandler, routineHandler *handlers.RoutineHandler, workoutHandler *handlers.WorkoutHandler) {
-	// Public HTML pages
+
 	r.GET("/", handlers.IndexPage)
 	r.GET("/login", handlers.LoginPage)
 	r.GET("/register", handlers.RegisterPage)
 
-	// Service HTML pages (may require authentication)
 	r.GET("/exercises", handlers.ExercisesPage)
 	r.GET("/exercises/create", handlers.ExerciseCreatePage)
 	r.GET("/exercises/:id/edit", handlers.ExerciseEditPage)
@@ -35,27 +34,23 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 	r.GET("/admin/users", handlers.AdminUsersPage)
 	r.GET("/admin/logs", handlers.AdminLogsPage)
 
-	// API pública
 	api := r.Group("/api")
 	{
 		api.POST("/register", userHandler.Register)
 		api.POST("/login", userHandler.Login)
 	}
 
-	// API privada (requiere autenticación)
 	apiPrivate := r.Group("/api")
 	apiPrivate.Use(middleware.AuthMiddleware())
 	{
-		// User Profile
+
 		apiPrivate.GET("/me", userHandler.GetMe)
 		apiPrivate.PUT("/me", userHandler.UpdateMe)
 		apiPrivate.PUT("/me/password", userHandler.ChangePassword)
 
-		// Exercises (solo lectura para todos los usuarios autenticados)
 		apiPrivate.GET("/exercises", exerciseHandler.GetExercise)
 		apiPrivate.GET("/exercises/:id", exerciseHandler.GetExercise)
 
-		// Exercises admin operations (solo administradores pueden crear/editar/eliminar)
 		exercisesAdmin := apiPrivate.Group("/exercises")
 		exercisesAdmin.Use(middleware.RequireRole("admin"))
 		{
@@ -64,29 +59,24 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 			exercisesAdmin.DELETE("/:id", exerciseHandler.DeleteExercise)
 		}
 
-		// Routines
 		apiPrivate.GET("/routines", routineHandler.GetRoutines)
 		apiPrivate.GET("/routines/:id", routineHandler.GetRoutineByID)
 		apiPrivate.POST("/routines", routineHandler.CreateRoutine)
 		apiPrivate.PUT("/routines/:id", routineHandler.UpdateRoutine)
 		apiPrivate.DELETE("/routines/:id", routineHandler.DeleteRoutine)
 
-		// Workouts
 		apiPrivate.GET("/workouts", workoutHandler.GetWorkouts)
 		apiPrivate.GET("/workouts/:id", workoutHandler.GetWorkoutByID)
 		apiPrivate.POST("/workouts", workoutHandler.CreateWorkout)
 		apiPrivate.PUT("/workouts/:id", workoutHandler.UpdateWorkout)
 		apiPrivate.DELETE("/workouts/:id", workoutHandler.DeleteWorkout)
 
-		// Admin API endpoints (require admin role)
-		// El middleware RequireRole("admin") protege estas rutas
 		adminAPI := apiPrivate.Group("/admin")
 		adminAPI.Use(middleware.RequireRole("admin"))
 		{
-			// Obtener usuario por ID (usa el handler existente)
+
 			adminAPI.GET("/users/:id", userHandler.GetUserByID)
 
-			// Get all users (with optional name filter)
 			adminAPI.GET("/users", userHandler.GetAllUsers)
 			adminAPI.PUT("/users/:id/role", userHandler.UpdateUserRole)
 			adminAPI.GET("/logs", func(c *gin.Context) {

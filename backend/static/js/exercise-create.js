@@ -1,4 +1,4 @@
-// Exercise create page functionality
+
 
 function addStep() {
     const container = document.getElementById('stepsContainer');

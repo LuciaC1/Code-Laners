@@ -97,12 +97,10 @@ func (repository UserRepository) UpdateUser(user models.User) (*mongo.UpdateResu
 		"updated_at":    user.UpdatedAt,
 	}
 
-	// Only update password_hash if it's not empty (to preserve existing password when updating other fields)
 	if user.PasswordHash != "" {
 		setFields["password_hash"] = user.PasswordHash
 	}
 
-	// Only include optional fields if they have values
 	if user.Weight != 0 {
 		setFields["weight"] = user.Weight
 	}

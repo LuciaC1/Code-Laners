@@ -1,4 +1,4 @@
-// Workouts list page functionality
+
 
 async function loadWorkouts() {
     try {

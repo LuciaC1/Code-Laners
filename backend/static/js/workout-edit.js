@@ -1,4 +1,4 @@
-// Workout edit page functionality
+
 
 let workoutId = null;
 let currentWorkout = null;
@@ -45,7 +45,7 @@ async function loadRoutines() {
             select.appendChild(option);
         });
         
-        // Set selected routine if workout has one
+        
         if (currentWorkout && currentWorkout.routine_id) {
             select.value = currentWorkout.routine_id;
         }
@@ -55,12 +55,12 @@ async function loadRoutines() {
 }
 
 function populateForm(workout) {
-    // Set routine
+    
     if (workout.routine_id) {
         document.getElementById('routine_id').value = workout.routine_id;
     }
     
-    // Set duration and calories
+    
     if (workout.duration_minutes) {
         document.getElementById('duration_minutes').value = workout.duration_minutes;
     }
@@ -68,7 +68,7 @@ function populateForm(workout) {
         document.getElementById('estimated_calories').value = workout.estimated_calories;
     }
     
-    // Set completed_at date and time
+    
     if (workout.completed_at) {
         const completedAt = new Date(workout.completed_at);
         const dateStr = completedAt.toISOString().split('T')[0];
@@ -77,12 +77,12 @@ function populateForm(workout) {
         document.getElementById('completed_at_time').value = timeStr;
     }
     
-    // Set notes
+    
     if (workout.notes) {
         document.getElementById('notes').value = workout.notes;
     }
     
-    // Show form and hide loading
+    
     document.getElementById('loadingSpinner').classList.add('d-none');
     document.getElementById('workoutForm').classList.remove('d-none');
 }
@@ -102,7 +102,7 @@ document.getElementById('workoutForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     hideError();
     
-    // Get date and time and combine them
+    
     const dateStr = document.getElementById('completed_at_date').value;
     const timeStr = document.getElementById('completed_at_time').value;
     const completedAt = new Date(`${dateStr}T${timeStr}`);
@@ -115,7 +115,7 @@ document.getElementById('workoutForm').addEventListener('submit', async (e) => {
         completed_at: completedAt.toISOString()
     };
 
-    // Remove undefined fields
+    
     Object.keys(workoutData).forEach(key => {
         if (workoutData[key] === undefined) {
             delete workoutData[key];

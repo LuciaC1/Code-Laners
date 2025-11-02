@@ -1,4 +1,4 @@
-// Routine edit page functionality
+
 
 let routineId = null;
 let selectedExercises = [];
@@ -33,7 +33,7 @@ function populateForm(routine) {
     document.getElementById('description').value = routine.description || '';
     document.getElementById('is_public').checked = routine.is_public || false;
 
-    // Populate exercises
+    
     selectedExercises = [];
     exerciseOrder = 0;
     
@@ -54,7 +54,7 @@ function populateForm(routine) {
     
     renderRoutineExercises();
     
-    // Show form and hide loading
+    
     document.getElementById('loadingSpinner').classList.add('d-none');
     document.getElementById('routineForm').classList.remove('d-none');
 }
@@ -166,7 +166,7 @@ function updateExercise(index, field, value) {
 
 function removeExercise(index) {
     selectedExercises.splice(index, 1);
-    // Reorder remaining exercises
+    
     selectedExercises.forEach((item, idx) => {
         item.order = idx + 1;
     });
@@ -189,7 +189,7 @@ document.getElementById('routineForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     hideError();
     
-    // Filter exercises to only include fields needed by backend
+    
     const exercisesToSend = selectedExercises.map(ex => ({
         exercise_id: ex.exercise_id,
         order: ex.order,

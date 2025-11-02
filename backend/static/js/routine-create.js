@@ -1,4 +1,4 @@
-// Routine create page functionality
+
 
 let selectedExercises = [];
 let exerciseOrder = 0;
@@ -49,7 +49,7 @@ function addExerciseToRoutine(exercise) {
     exerciseOrder++;
     const exerciseItem = {
         exercise_id: exercise.id,
-        exercise_name: exercise.name, // Save exercise name
+        exercise_name: exercise.name, 
         order: exerciseOrder,
         sets: 3,
         reps: 10,
@@ -110,7 +110,7 @@ function updateExercise(index, field, value) {
 
 function removeExercise(index) {
     selectedExercises.splice(index, 1);
-    // Reorder remaining exercises
+    
     selectedExercises.forEach((item, idx) => {
         item.order = idx + 1;
     });
@@ -127,7 +127,7 @@ function showError(message) {
 document.getElementById('routineForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Filter exercises to only include fields needed by backend
+    
     const exercisesToSend = selectedExercises.map(ex => ({
         exercise_id: ex.exercise_id,
         order: ex.order,

@@ -1,4 +1,4 @@
-// Workout detail page functionality
+
 
 let currentWorkoutId = null;
 

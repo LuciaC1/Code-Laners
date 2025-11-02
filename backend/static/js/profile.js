@@ -1,13 +1,13 @@
-// Profile page handler
+
 let userData = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Check authentication
+    
     if (!requireAuth()) {
         return;
     }
 
-    // Check if login was successful
+    
     checkLoginSuccess();
     
     loadUserProfile();
@@ -21,12 +21,12 @@ function checkLoginSuccess() {
         if (successMessage) {
             successMessage.classList.remove('d-none');
             
-            // Remove query parameter from URL without reloading
+            
             const url = new URL(window.location);
             url.searchParams.delete('login');
             window.history.replaceState({}, '', url);
             
-            // Auto-hide after 5 seconds
+            
             setTimeout(() => {
                 const bsAlert = new bootstrap.Alert(successMessage);
                 bsAlert.close();
@@ -57,12 +57,12 @@ async function loadUserProfile() {
 }
 
 function populateProfileForms(user) {
-    // Personal Information
+    
     if (document.getElementById('profileName')) {
         document.getElementById('profileName').value = user.name || '';
         document.getElementById('profileEmail').value = user.email || '';
         
-        // Format date for input[type="date"]
+        
         if (user.date_of_birth) {
             const date = new Date(user.date_of_birth);
             const formattedDate = date.toISOString().split('T')[0];
@@ -70,14 +70,14 @@ function populateProfileForms(user) {
         }
     }
 
-    // Physical Data
+    
     if (document.getElementById('profileWeight')) {
         document.getElementById('profileWeight').value = user.weight || '';
         document.getElementById('profileHeight').value = user.height || '';
         document.getElementById('profileLevel').value = user.level || '';
     }
 
-    // Goals
+    
     if (user.goals && Array.isArray(user.goals)) {
         user.goals.forEach(goal => {
             const checkbox = document.querySelector(`input[name="goals"][value="${goal}"]`);
@@ -89,7 +89,7 @@ function populateProfileForms(user) {
 }
 
 function setupForms() {
-    // Personal Information Form
+    
     const personalInfoForm = document.getElementById('personalInfoForm');
     if (personalInfoForm) {
         personalInfoForm.addEventListener('submit', async function(e) {
@@ -98,7 +98,7 @@ function setupForms() {
         });
     }
 
-    // Physical Data Form
+    
     const physicalDataForm = document.getElementById('physicalDataForm');
     if (physicalDataForm) {
         physicalDataForm.addEventListener('submit', async function(e) {
@@ -107,7 +107,7 @@ function setupForms() {
         });
     }
 
-    // Goals Form
+    
     const goalsForm = document.getElementById('goalsForm');
     if (goalsForm) {
         goalsForm.addEventListener('submit', async function(e) {
@@ -116,7 +116,7 @@ function setupForms() {
         });
     }
 
-    // Change Password Form
+    
     const changePasswordForm = document.getElementById('changePasswordForm');
     if (changePasswordForm) {
         changePasswordForm.addEventListener('submit', async function(e) {
@@ -149,7 +149,7 @@ async function updatePersonalInfo() {
         if (response.ok) {
             showSuccess('personalInfoSuccess', 'Información personal actualizada correctamente');
             hideError('personalInfoError');
-            // Reload profile to get updated data
+            
             setTimeout(() => loadUserProfile(), 1000);
         } else {
             showError('personalInfoError', data.error || 'Error al actualizar la información');
@@ -244,7 +244,7 @@ async function changePassword() {
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
-    // Validate passwords match
+    
     if (newPassword !== confirmPassword) {
         showError('passwordError', 'Las contraseñas no coinciden');
         hideSuccess('passwordSuccess');
@@ -269,10 +269,10 @@ async function changePassword() {
             showSuccess('passwordSuccess', 'Contraseña actualizada correctamente. Serás redirigido al login...');
             hideError('passwordError');
             
-            // Clear form
+            
             document.getElementById('changePasswordForm').reset();
             
-            // Redirect to login after 2 seconds (user needs to re-login)
+            
             setTimeout(() => {
                 localStorage.removeItem('token');
                 window.location.href = '/login';

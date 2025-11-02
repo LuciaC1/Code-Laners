@@ -1,4 +1,4 @@
-// Admin logs functionality
+
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!requireAuth()) {
@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function checkAdminAccess() {
-    // El middleware del backend verifica el rol, así que solo verificamos autenticación
-    // Si el backend rechaza, manejará el error automáticamente
+    
+    
     if (!requireAuth()) {
         return;
     }
@@ -25,7 +25,7 @@ async function loadLogs() {
         });
 
         if (!response.ok) {
-            // If logs endpoint doesn't exist, show mock data
+            
             renderMockLogs();
             return;
         }
@@ -35,7 +35,7 @@ async function loadLogs() {
         renderLogs(logs);
     } catch (error) {
         console.error('Error loading logs:', error);
-        // Show mock logs if API doesn't exist
+        
         renderMockLogs();
     }
 }
@@ -81,7 +81,7 @@ function renderLogs(logs) {
 }
 
 function renderMockLogs() {
-    // Generate mock logs based on recent activity
+    
     const mockLogs = [
         {
             timestamp: new Date().toISOString(),
@@ -151,12 +151,12 @@ function showLogDetails(log) {
         </div>
     `;
 
-    // Show in a modal or alert
+    
     alert(`Detalles:\n${JSON.stringify(log, null, 2)}`);
 }
 
 function applyLogFilters() {
-    // In a real implementation, send filters to server
+    
     loadLogs();
 }
 

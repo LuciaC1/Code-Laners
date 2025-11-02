@@ -1,4 +1,4 @@
-// Workout create page functionality
+
 
 async function loadRoutines() {
     try {
@@ -11,7 +11,7 @@ async function loadRoutines() {
         const data = await response.json();
         const select = document.getElementById('routine_id');
         
-        // Check if routine_id is in URL params
+        
         const urlParams = new URLSearchParams(window.location.search);
         const routineId = urlParams.get('routine_id');
         
@@ -45,7 +45,7 @@ document.getElementById('workoutForm').addEventListener('submit', async (e) => {
         notes: document.getElementById('notes').value || undefined
     };
 
-    // Remove undefined fields
+    
     Object.keys(workoutData).forEach(key => {
         if (workoutData[key] === undefined) {
             delete workoutData[key];

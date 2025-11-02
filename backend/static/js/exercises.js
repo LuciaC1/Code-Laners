@@ -1,4 +1,4 @@
-// Exercises list page functionality
+
 
 async function loadExercises(params = null) {
     try {

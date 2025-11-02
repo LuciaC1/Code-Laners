@@ -1,6 +1,6 @@
-// Admin users management functionality
 
-let allUsers = []; // Store all users for filtering
+
+let allUsers = []; 
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!requireAuth()) {
@@ -10,30 +10,30 @@ document.addEventListener('DOMContentLoaded', function() {
     checkAdminAccess();
     loadUsers();
     
-    // Filter by name on input (with debounce)
+    
     let nameFilterTimeout;
     const nameInput = document.getElementById('filterUserName');
     if (nameInput) {
         nameInput.addEventListener('input', function() {
             clearTimeout(nameFilterTimeout);
             nameFilterTimeout = setTimeout(() => {
-                loadUsers(); // Reload with name filter
-            }, 500); // Wait 500ms after user stops typing
+                loadUsers(); 
+            }, 500); 
         });
     }
     
-    // Filter by role on change
+    
     const roleSelect = document.getElementById('filterUserRole');
     if (roleSelect) {
         roleSelect.addEventListener('change', function() {
-            applyFilters(); // Just apply client-side filter
+            applyFilters(); 
         });
     }
 });
 
 async function checkAdminAccess() {
-    // El middleware del backend verifica el rol, así que solo verificamos autenticación
-    // Si el backend rechaza, manejará el error automáticamente
+    
+    
     if (!requireAuth()) {
         return;
     }
@@ -43,7 +43,7 @@ async function loadUsers() {
     try {
         const headers = getApiHeaders();
         
-        // Get name filter from input (for server-side filtering)
+        
         const nameFilter = document.getElementById('filterUserName')?.value || '';
         const url = nameFilter 
             ? `/api/admin/users?name=${encodeURIComponent(nameFilter)}`
@@ -59,7 +59,7 @@ async function loadUsers() {
 
         const data = await response.json();
         allUsers = data.users || [];
-        applyFilters(); // Apply client-side filters
+        applyFilters(); 
     } catch (error) {
         console.error('Error loading users:', error);
         const tbody = document.getElementById('usersTableBody');
@@ -90,7 +90,7 @@ function renderUsers(users) {
             ? '<span class="badge bg-danger">Administrador</span>'
             : '<span class="badge bg-primary">Usuario</span>';
 
-        // Handle ID - can be ObjectID object or string
+        
         let userId = 'N/A';
         if (user.id) {
             userId = typeof user.id === 'string' ? user.id : (user.id.$oid || user.id.toString());
@@ -219,15 +219,15 @@ async function toggleUserRole(userId, currentRole) {
 function applyFilters() {
     const role = document.getElementById('filterUserRole')?.value || '';
     
-    // Filter users client-side by role
+    
     let filteredUsers = [...allUsers];
     
-    // Apply role filter
+    
     if (role) {
         filteredUsers = filteredUsers.filter(user => user.role === role);
     }
     
-    // Render filtered users
+    
     renderUsers(filteredUsers);
 }
 
