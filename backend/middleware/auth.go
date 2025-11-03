@@ -1,10 +1,13 @@
 package middleware
+
 import (
+	"backend/auth"
 	"net/http"
 	"strings"
-	"backend/auth"
+
 	"github.com/gin-gonic/gin"
 )
+
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -29,6 +32,11 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Set("user_id", claims.UserID)
 		c.Set("user_email", claims.Email)
 		c.Set("user_role", claims.Role)
+		c.Next()
+	}
+}
+func RequireAuthPage() gin.HandlerFunc {
+	return func(c *gin.Context) {
 		c.Next()
 	}
 }

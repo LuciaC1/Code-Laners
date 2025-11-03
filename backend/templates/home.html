@@ -6,14 +6,27 @@
                 <h1 class="display-4"><i class="bi bi-activity"></i> Bienvenido a la App Fitness de Code-Laners</h1>
                 <p class="lead">Gestiona tus ejercicios, rutinas y entrenamientos de manera profesional.</p>
                 <hr class="my-4 bg-white">
-                <p>Comienza tu viaje fitness hoy mismo</p>
-                <a class="btn btn-warning btn-lg" href="/exercises" role="button">
+                <div id="authButtons" class="d-flex flex-column gap-2" style="max-width: 300px;">
+                    <div>
+                        <p class="mb-2">Comienza tu viaje fitness hoy mismo</p>
+                        <a id="registerBtn" class="btn btn-warning btn-lg" href="/register" role="button">
+                            <i class="bi bi-person-plus"></i> Registrarse
+                        </a>
+                    </div>
+                    <div>
+                        <p class="mb-2">o continúa donde lo dejaste...</p>
+                        <a id="loginBtn" class="btn btn-success btn-lg" href="/login" role="button">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+                <a id="exploreBtn" class="btn btn-warning btn-lg" href="/exercises" role="button" style="display: none;">
                     <i class="bi bi-barbell"></i> Explorar Ejercicios
                 </a>
             </div>
         </div>
     </div>
-    <div class="row g-4">
+    <div class="row g-4" id="featuresSection" style="display: none;">
         <div class="col-md-4">
             <div class="card h-100 shadow-sm">
                 <div class="card-body text-center">

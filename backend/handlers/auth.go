@@ -29,12 +29,12 @@ func (handler *UserHandler) Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user, err := handler.service.Register(request)
+	userResponse, err := handler.service.Register(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, user)
+	c.JSON(http.StatusCreated, userResponse)
 }
 func (handler *UserHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest

@@ -64,6 +64,7 @@ function updateAuthSection() {
 function logout() {
     if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.location.href = '/login';
     }
 }

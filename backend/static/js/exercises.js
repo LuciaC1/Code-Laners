@@ -41,7 +41,7 @@ function renderExercises(exercises) {
                         <span class="badge bg-success">${exercise.muscle_group}</span>
                         <span class="badge bg-warning text-dark">${exercise.difficulty}</span>
                     </div>
-                    <a href="/exercises/${exercise.id}" class="btn btn-outline-primary btn-sm">
+                    <a href="/exercises/${exercise.id}" class="btn btn-primary btn-sm">
                         <i class="bi bi-eye"></i> Ver Detalles
                     </a>
                 </div>
