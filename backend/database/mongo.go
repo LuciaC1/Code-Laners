@@ -17,7 +17,6 @@ func (mongoDB *MongoDB) GetClient() *mongo.Client {
 	return mongoDB.Client
 }
 func (mongoDB *MongoDB) Connect() error {
-	// Usar variable de entorno si está disponible, sino usar valor por defecto
 	mongoURI := os.Getenv("MONGODB_URI")
 	if mongoURI == "" {
 		mongoURI = "mongodb://localhost:27017"
