@@ -11,14 +11,21 @@
         }
         
         const hasToken = token && token.trim() !== '' && token !== 'null' && token !== 'undefined';
-        
+
+        const registerSection = document.getElementById('registerSection');
+        const loginSection = document.getElementById('loginSection');
+
         if (hasToken) {
             exploreBtn.style.display = 'inline-block';
             authButtons.style.display = 'none';
+            if (registerSection) registerSection.style.display = 'none';
+            if (loginSection) loginSection.style.display = 'none';
             featuresSection.style.display = '';
         } else {
             exploreBtn.style.display = 'none';
             authButtons.style.display = 'flex';
+            if (registerSection) registerSection.style.display = '';
+            if (loginSection) loginSection.style.display = '';
             featuresSection.style.display = 'none';
         }
     }
