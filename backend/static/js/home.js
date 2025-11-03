@@ -10,7 +10,9 @@
             return;
         }
         
-        if (token && token.trim() !== '' && token !== 'null' && token !== 'undefined') {
+        const hasToken = token && token.trim() !== '' && token !== 'null' && token !== 'undefined';
+        
+        if (hasToken) {
             exploreBtn.style.display = 'inline-block';
             authButtons.style.display = 'none';
             featuresSection.style.display = '';
