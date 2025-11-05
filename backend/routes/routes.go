@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandler *handlers.ExerciseHandler, routineHandler *handlers.RoutineHandler, workoutHandler *handlers.WorkoutHandler) {
+func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandler *handlers.ExerciseHandler, routineHandler *handlers.RoutineHandler, workoutHandler *handlers.WorkoutHandler, statsHandler *handlers.StatsHandler) {
 	r.GET("/", handlers.IndexPage)
 	r.GET("/login", handlers.LoginPage)
 	r.GET("/register", handlers.RegisterPage)
@@ -60,6 +60,7 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 		apiPrivate.POST("/workouts", workoutHandler.CreateWorkout)
 		apiPrivate.PUT("/workouts/:id", workoutHandler.UpdateWorkout)
 		apiPrivate.DELETE("/workouts/:id", workoutHandler.DeleteWorkout)
+		apiPrivate.GET("/stats", statsHandler.GetUserStats)
 		adminAPI := apiPrivate.Group("/admin")
 		adminAPI.Use(middleware.RequireRole("admin"))
 		{
@@ -72,6 +73,7 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 			adminAPI.DELETE("/logs", func(c *gin.Context) {
 				c.JSON(http.StatusNotImplemented, gin.H{"error": "Handler not implemented yet"})
 			})
+			adminAPI.GET("/stats", statsHandler.GetAdminStats)
 		}
 	}
 }

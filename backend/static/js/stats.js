@@ -10,39 +10,35 @@ let progressChart = null;
 async function loadStatistics() {
     try {
         const headers = getApiHeaders();
-        const workoutsResponse = await fetch('/api/workouts', {
-            headers: headers
-        });
-        if (!workoutsResponse.ok) {
-            if (workoutsResponse.status === 401) {
+        const statsResponse = await fetch('/api/stats', { headers });
+        if (!statsResponse.ok) {
+            if (statsResponse.status === 401) {
                 window.location.href = '/login';
                 return;
             }
-            throw new Error(`Error al cargar entrenamientos: ${workoutsResponse.status}`);
+            throw new Error(`Error al cargar estadísticas: ${statsResponse.status}`);
         }
-        const workoutsData = await workoutsResponse.json();
-        const workouts = workoutsData.workouts || [];
-        const routinesResponse = await fetch('/api/routines', {
-            headers: headers
-        });
-        if (!routinesResponse.ok) {
-            if (routinesResponse.status === 401) {
-                window.location.href = '/login';
-                return;
-            }
-            throw new Error(`Error al cargar rutinas: ${routinesResponse.status}`);
-        }
-        const routinesData = await routinesResponse.json();
-        const routines = routinesData.routines || [];
-        calculateSummaryStats(workouts, routines);
-        renderRecentWorkouts(workouts.slice(0, 10));
+        const statsData = await statsResponse.json();
+        // summary
+        const summary = statsData.summary || {};
+        document.getElementById('totalWorkouts').textContent = summary.totalWorkouts || 0;
+        document.getElementById('totalRoutines').textContent = summary.totalRoutines || 0;
+        document.getElementById('totalMinutes').textContent = summary.totalMinutes || 0;
+        document.getElementById('totalCalories').textContent = summary.totalCalories || 0;
+        const workouts = statsData.recentWorkouts || [];
+        // charts use the provided arrays
         if (typeof Chart === 'undefined') {
             loadChartLibrary().then(() => {
-                renderCharts(workouts, routines);
+                renderFrequencyChartFromData(statsData.frequency || []);
+                renderRoutinesChartFromData(statsData.routinesDistribution || []);
+                renderProgressChartFromData(statsData.progress || []);
             });
         } else {
-            renderCharts(workouts, routines);
+            renderFrequencyChartFromData(statsData.frequency || []);
+            renderRoutinesChartFromData(statsData.routinesDistribution || []);
+            renderProgressChartFromData(statsData.progress || []);
         }
+        renderRecentWorkouts(workouts);
     } catch (error) {
         console.error('Error loading statistics:', error);
         const tbody = document.getElementById('recentWorkoutsTable');
@@ -106,93 +102,49 @@ function renderFrequencyChart(workouts) {
         }
     });
 }
-function renderRoutinesChart(workouts) {
-    const ctx = document.getElementById('routinesChart');
+
+function renderFrequencyChartFromData(frequency) {
+    const ctx = document.getElementById('frequencyChart');
     if (!ctx) return;
-    const routineCounts = {};
-    workouts.forEach(workout => {
-        const routineName = workout.routine_name || 'Sin rutina';
-        routineCounts[routineName] = (routineCounts[routineName] || 0) + 1;
-    });
-    const labels = Object.keys(routineCounts);
-    const data = Object.values(routineCounts);
-    const colors = generateColors(labels.length);
-    if (routinesChart) {
-        routinesChart.destroy();
-    }
-    routinesChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: colors
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
+    const labels = frequency.map(f => f.label);
+    const data = frequency.map(f => f.count);
+    if (frequencyChart) { frequencyChart.destroy(); }
+    frequencyChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ label: 'Entrenamientos por Semana', data: data, backgroundColor: 'rgba(13, 110, 253, 0.6)', borderColor: 'rgba(13, 110, 253, 1)', borderWidth: 1 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
     });
 }
+function renderRoutinesChart(workouts) {
+    // kept for backwards compatibility but not used when data endpoint available
+}
+
+function renderRoutinesChartFromData(routinesDistribution) {
+    const ctx = document.getElementById('routinesChart');
+    if (!ctx) return;
+    const labels = routinesDistribution.map(r => r.routine_name || r.routineName || 'Sin rutina');
+    const data = routinesDistribution.map(r => r.count || 0);
+    const colors = generateColors(labels.length);
+    if (routinesChart) { routinesChart.destroy(); }
+    routinesChart = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: colors }] }, options: { responsive: true, maintainAspectRatio: false } });
+
+}
 function renderProgressChart(workouts) {
+    // kept for compatibility; use renderProgressChartFromData when using aggregated endpoint
+}
+
+function renderProgressChartFromData(points) {
     const ctx = document.getElementById('progressChart');
     if (!ctx) return;
-    const sortedWorkouts = [...workouts].sort((a, b) => 
-        new Date(a.completed_at) - new Date(b.completed_at)
-    );
-    const labels = sortedWorkouts.map(w => {
-        const date = new Date(w.completed_at);
-        return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
-    });
-    const caloriesData = sortedWorkouts.map(w => w.estimated_calories || 0);
-    const durationData = sortedWorkouts.map(w => w.duration_minutes || 0);
-    if (progressChart) {
-        progressChart.destroy();
-    }
+    const sorted = [...points].sort((a,b) => new Date(a.date) - new Date(b.date));
+    const labels = sorted.map(p => new Date(p.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }));
+    const caloriesData = sorted.map(p => p.calories || 0);
+    const durationData = sorted.map(p => p.duration || 0);
+    if (progressChart) { progressChart.destroy(); }
     progressChart = new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Calorías Quemadas',
-                    data: caloriesData,
-                    borderColor: 'rgba(220, 53, 69, 1)',
-                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                    yAxisID: 'y'
-                },
-                {
-                    label: 'Duración (min)',
-                    data: durationData,
-                    borderColor: 'rgba(13, 110, 253, 1)',
-                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                    yAxisID: 'y1'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                }
-            }
-        }
+        data: { labels: labels, datasets: [ { label: 'Calorías Quemadas', data: caloriesData, borderColor: 'rgba(220, 53, 69, 1)', backgroundColor: 'rgba(220, 53, 69, 0.1)', yAxisID: 'y' }, { label: 'Duración (min)', data: durationData, borderColor: 'rgba(13, 110, 253, 1)', backgroundColor: 'rgba(13, 110, 253, 0.1)', yAxisID: 'y1' } ] },
+        options: { responsive: true, interaction: { mode: 'index', intersect: false }, scales: { y: { type: 'linear', display: true, position: 'left' }, y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } } } }
     });
 }
 function renderRecentWorkouts(workouts) {
