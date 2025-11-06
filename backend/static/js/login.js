@@ -5,7 +5,12 @@ document.addEventListener('DOMContentLoaded', function() {
         loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             e.stopPropagation();
-            errorMessage.classList.add('d-none');
+            if (errorMessage) {
+                errorMessage.classList.add('d-none');
+            }
+            
+            const submitBtn = loginForm.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
             const formData = new FormData(loginForm);
             const requestData = {
                 email: formData.get('email'),
@@ -30,13 +35,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     window.location.href = '/profile?login=success';
                 } else {
-                    errorMessage.textContent = data.error || 'Email o contraseña incorrectos';
-                    errorMessage.classList.remove('d-none');
+                    if (errorMessage) {
+                        errorMessage.textContent = data.error || 'Email o contraseña incorrectos';
+                        errorMessage.classList.remove('d-none');
+                    }
                 }
             } catch (error) {
-                errorMessage.textContent = 'Error de conexión. Por favor, intenta nuevamente.';
-                errorMessage.classList.remove('d-none');
+                if (errorMessage) {
+                    errorMessage.textContent = 'Error de conexión. Por favor, intenta nuevamente.';
+                    errorMessage.classList.remove('d-none');
+                }
                 console.error('Error:', error);
+            } finally {
+                
+                if (submitBtn) submitBtn.disabled = false;
             }
         });
     }

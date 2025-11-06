@@ -19,14 +19,14 @@ async function loadStatistics() {
             throw new Error(`Error al cargar estadísticas: ${statsResponse.status}`);
         }
         const statsData = await statsResponse.json();
-        // summary
+        
         const summary = statsData.summary || {};
         document.getElementById('totalWorkouts').textContent = summary.totalWorkouts || 0;
         document.getElementById('totalRoutines').textContent = summary.totalRoutines || 0;
         document.getElementById('totalMinutes').textContent = summary.totalMinutes || 0;
         document.getElementById('totalCalories').textContent = summary.totalCalories || 0;
         const workouts = statsData.recentWorkouts || [];
-        // charts use the provided arrays
+        
         if (typeof Chart === 'undefined') {
             loadChartLibrary().then(() => {
                 renderFrequencyChartFromData(statsData.frequency || []);
@@ -116,7 +116,7 @@ function renderFrequencyChartFromData(frequency) {
     });
 }
 function renderRoutinesChart(workouts) {
-    // kept for backwards compatibility but not used when data endpoint available
+
 }
 
 function renderRoutinesChartFromData(routinesDistribution) {
@@ -130,7 +130,6 @@ function renderRoutinesChartFromData(routinesDistribution) {
 
 }
 function renderProgressChart(workouts) {
-    // kept for compatibility; use renderProgressChartFromData when using aggregated endpoint
 }
 
 function renderProgressChartFromData(points) {
