@@ -2,6 +2,8 @@ package handlers
 import (
 	"net/http"
 	"backend/dto"
+	"backend/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/gin-gonic/gin"
 )
 func (handler *UserHandler) GetUserByID(c *gin.Context) {
@@ -104,9 +106,33 @@ func (handler *UserHandler) UpdateUserRole(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	user, err := handler.service.GetUserByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado"})
+		return
+	}
 	if err := handler.service.UpdateUserRole(id, req.Role); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	if handler.logService != nil {
+		adminID, _ := c.Get("user_id")
+		var adminIDObj *primitive.ObjectID
+		if adminIDStr, ok := adminID.(string); ok {
+			if idObj, err := primitive.ObjectIDFromHex(adminIDStr); err == nil {
+				adminIDObj = &idObj
+			}
+		}
+		_ = handler.logService.CreateLog(
+			models.LogLevelInfo,
+			models.LogTypeUser,
+			"Rol de usuario actualizado",
+			adminIDObj,
+			user.Name,
+			"Rol cambiado a: "+req.Role,
+		)
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Rol actualizado correctamente"})
 }

@@ -26,36 +26,9 @@ func (s *ExerciseService) GetExercises(name, category, muscleGroup string) ([]mo
 	return s.repo.GetExercises(name, category, muscleGroup)
 }
 func (s *ExerciseService) GetExerciseByID(id string) (models.Exercise, error) {
-	if id == "" {
-		return models.Exercise{}, errors.New("id required")
-	}
 	return s.repo.GetExerciseByID(id)
 }
-func validateExerciseRequest(request dto.ExerciseRequest) error {
-	if request.UserID == "" {
-		return errors.New("user id is required")
-	}
-	if request.Name == "" {
-		return errors.New("name is required")
-	}
-	if request.Category == "" {
-		return errors.New("category is required")
-	}
-	if request.MuscleGroup == "" {
-		return errors.New("muscle group is required")
-	}
-	if request.Difficulty == "" {
-		return errors.New("difficulty is required")
-	}
-	if _, err := primitive.ObjectIDFromHex(request.UserID); err != nil {
-		return errors.New("invalid user id")
-	}
-	return nil
-}
 func (service *ExerciseService) CreateExercise(exercise dto.ExerciseRequest) (dto.ExerciseResponse, error) {
-	if err := validateExerciseRequest(exercise); err != nil {
-		return dto.ExerciseResponse{}, err
-	}
 	modelExercise := utils.ConvertRequestToExerciseModel(exercise)
 	result, err := service.repo.CreateExercise(modelExercise)
 	if err != nil {
@@ -68,9 +41,6 @@ func (service *ExerciseService) CreateExercise(exercise dto.ExerciseRequest) (dt
 	return utils.ConvertExerciseModelToDTO(createdExercise), nil
 }
 func (service *ExerciseService) UpdateExercise(id string, exercise dto.ExerciseRequest) (dto.ExerciseResponse, error) {
-	if err := validateExerciseRequest(exercise); err != nil {
-		return dto.ExerciseResponse{}, err
-	}
 	existing, err := service.repo.GetExerciseByID(id)
 	if err != nil {
 		return dto.ExerciseResponse{}, err

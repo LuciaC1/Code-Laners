@@ -2,18 +2,26 @@ package handlers
 
 import (
 	"backend/dto"
+	"backend/models"
 	"backend/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ExerciseHandler struct {
-	service services.ExerciseInterface
+	service    services.ExerciseInterface
+	logService services.LogServiceInterface
+	userService services.UserServiceInterface
 }
 
-func NewExerciseHandler(service services.ExerciseInterface) *ExerciseHandler {
-	return &ExerciseHandler{service: service}
+func NewExerciseHandler(service services.ExerciseInterface, logService services.LogServiceInterface, userService services.UserServiceInterface) *ExerciseHandler {
+	return &ExerciseHandler{
+		service:     service,
+		logService:  logService,
+		userService: userService,
+	}
 }
 func (h *ExerciseHandler) GetExercise(c *gin.Context) {
 	if id := c.Param("id"); id != "" {
@@ -54,6 +62,19 @@ func (h *ExerciseHandler) CreateExercise(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create exercise"})
 		return
 	}
+
+	if h.logService != nil {
+		userIDObj, _ := primitive.ObjectIDFromHex(userID.(string))
+		user, _ := h.userService.GetUserByID(userID.(string))
+		_ = h.logService.CreateLog(
+			models.LogLevelSuccess,
+			models.LogTypeExercise,
+			"Ejercicio creado",
+			&userIDObj,
+			user.Name,
+			"Ejercicio: "+exercise.Name,
+		)
+	}
 	c.JSON(http.StatusCreated, exercise)
 }
 func (h *ExerciseHandler) UpdateExercise(c *gin.Context) {
@@ -78,6 +99,19 @@ func (h *ExerciseHandler) UpdateExercise(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update exercise"})
 		return
 	}
+
+	if h.logService != nil {
+		userIDObj, _ := primitive.ObjectIDFromHex(userID.(string))
+		user, _ := h.userService.GetUserByID(userID.(string))
+		_ = h.logService.CreateLog(
+			models.LogLevelInfo,
+			models.LogTypeExercise,
+			"Ejercicio actualizado",
+			&userIDObj,
+			user.Name,
+			"Ejercicio: "+exercise.Name,
+		)
+	}
 	c.JSON(http.StatusOK, exercise)
 }
 func (h *ExerciseHandler) DeleteExercise(c *gin.Context) {
@@ -91,7 +125,21 @@ func (h *ExerciseHandler) DeleteExercise(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing exercise ID"})
 		return
 	}
-	err := h.service.DeleteExercise(userID.(string), id)
+
+	exercise, err := h.service.GetExerciseByID(id)
+	if err == nil && h.logService != nil {
+		userIDObj, _ := primitive.ObjectIDFromHex(userID.(string))
+		user, _ := h.userService.GetUserByID(userID.(string))
+		_ = h.logService.CreateLog(
+			models.LogLevelWarning,
+			models.LogTypeExercise,
+			"Ejercicio eliminado",
+			&userIDObj,
+			user.Name,
+			"Ejercicio: "+exercise.Name,
+		)
+	}
+	err = h.service.DeleteExercise(userID.(string), id)
 	if err != nil {
 		if err.Error() == "unauthorized: cannot delete exercise you do not own" {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})

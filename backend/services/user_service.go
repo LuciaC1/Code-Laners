@@ -1,7 +1,6 @@
 package services
 import (
 	"errors"
-	"regexp"
 	"time"
 	"backend/auth"
 	"backend/database"
@@ -28,12 +27,6 @@ func NewUserService(repo repositories.UserRepositoryInterface) *UserService {
 	return &UserService{repo: repo}
 }
 func (s *UserService) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
-	if req.Name == "" || req.Email == "" || req.Password == "" || req.DateOfBirth == "" {
-		return dto.RegisterResponse{}, errors.New("datos incompletos")
-	}
-	if !isValidEmail(req.Email) {
-		return dto.RegisterResponse{}, errors.New("email inválido")
-	}
 	dob, err := time.Parse(time.RFC3339, req.DateOfBirth)
 	if err != nil {
 		dob, err = time.Parse("2006-01-02", req.DateOfBirth)
@@ -94,9 +87,6 @@ func (s *UserService) Register(req dto.RegisterRequest) (dto.RegisterResponse, e
 	}, nil
 }
 func (s *UserService) Login(req dto.LoginRequest) (dto.User, error) {
-	if req.Email == "" || req.Password == "" {
-		return dto.User{}, errors.New("credenciales requeridas")
-	}
 	found, err := s.repo.GetUserByEmail(req.Email)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -133,9 +123,6 @@ func (s *UserService) UpdateUser(id string, req dto.UpdateUserRequest) error {
 	m, err := s.repo.GetUserByID(id)
 	if err != nil {
 		return err
-	}
-	if req.Email != "" && !isValidEmail(req.Email) {
-		return errors.New("email inválido")
 	}
 	if req.Name != "" {
 		m.Name = req.Name
@@ -205,10 +192,6 @@ func (s *UserService) DeleteUser(id string) error {
 	}
 	_, err = s.repo.DeleteUser(objID)
 	return err
-}
-func isValidEmail(email string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
-	return re.MatchString(email)
 }
 func modelUserToDTO(m models.User) dto.User {
 	return dto.User{

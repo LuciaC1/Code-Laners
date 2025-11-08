@@ -214,30 +214,15 @@ func (s *RoutineService) DuplicateRoutine(ownerID string, sourceRoutineID string
 	return "", nil
 }
 func validateRoutineEntries(entries []dto.RoutineExcerciseList) error {
-	if len(entries) == 0 {
-		return errors.New("la rutina debe contener al menos un ejercicio")
-	}
 	orders := make(map[int]bool)
 	for i, e := range entries {
-		if e.ExerciseID == "" {
-			return fmt.Errorf("entry %d: exercise_id requerido", i)
-		}
 		if _, err := primitive.ObjectIDFromHex(e.ExerciseID); err != nil {
 			return fmt.Errorf("entry %d: exercise_id inválido: %w", i, err)
-		}
-		if e.Order <= 0 {
-			return fmt.Errorf("entry %d: order debe ser > 0", i)
 		}
 		if orders[e.Order] {
 			return fmt.Errorf("entry %d: order duplicado (%d)", i, e.Order)
 		}
 		orders[e.Order] = true
-		if e.Sets <= 0 {
-			return fmt.Errorf("entry %d: sets debe ser > 0", i)
-		}
-		if e.Reps <= 0 {
-			return fmt.Errorf("entry %d: reps debe ser > 0", i)
-		}
 	}
 	return nil
 }

@@ -15,12 +15,14 @@ import (
 )
 
 type UserHandler struct {
-	service services.UserServiceInterface
+	service    services.UserServiceInterface
+	logService services.LogServiceInterface
 }
 
-func NewUserHandler(service services.UserServiceInterface) *UserHandler {
+func NewUserHandler(service services.UserServiceInterface, logService services.LogServiceInterface) *UserHandler {
 	return &UserHandler{
-		service: service,
+		service:    service,
+		logService: logService,
 	}
 }
 func (handler *UserHandler) Register(c *gin.Context) {
@@ -33,6 +35,20 @@ func (handler *UserHandler) Register(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+	if handler.logService != nil {
+		userID := primitive.NewObjectID()
+		if id, err := primitive.ObjectIDFromHex(userResponse.ID); err == nil {
+			userID = id
+		}
+		_ = handler.logService.CreateLog(
+			models.LogLevelSuccess,
+			models.LogTypeAuth,
+			"Usuario registrado",
+			&userID,
+			userResponse.Name,
+			"Usuario registrado exitosamente",
+		)
 	}
 	c.JSON(http.StatusCreated, userResponse)
 }
@@ -61,6 +77,17 @@ func (handler *UserHandler) Login(c *gin.Context) {
 		Revoked:   false,
 	}
 	_, _ = refreshRepo.Save(rt)
+
+	if handler.logService != nil {
+		_ = handler.logService.CreateLog(
+			models.LogLevelSuccess,
+			models.LogTypeAuth,
+			"Usuario inició sesión",
+			&user.ID,
+			user.Name,
+			"Login exitoso",
+		)
+	}
 	c.JSON(http.StatusOK, dto.AuthResponse{
 		AccessToken:  access,
 		RefreshToken: refresh,
@@ -117,6 +144,24 @@ func (handler *UserHandler) Logout(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "no se pudo revocar el token"})
 		return
+	}
+	if handler.logService != nil {
+		userID, _ := c.Get("user_id")
+		if userIDStr, ok := userID.(string); ok {
+			if userIDObj, err := primitive.ObjectIDFromHex(userIDStr); err == nil {
+				user, err := handler.service.GetUserByID(userIDStr)
+				if err == nil {
+					_ = handler.logService.CreateLog(
+						models.LogLevelInfo,
+						models.LogTypeAuth,
+						"Usuario cerró sesión",
+						&userIDObj,
+						user.Name,
+						"Logout exitoso",
+					)
+				}
+			}
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "logout exitoso"})
 }

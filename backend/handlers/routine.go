@@ -2,14 +2,22 @@ package handlers
 import (
 	"net/http"
 	"backend/dto"
+	"backend/models"
 	"backend/services"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/gin-gonic/gin"
 )
 type RoutineHandler struct {
-	service services.RoutineServiceInterface
+	service     services.RoutineServiceInterface
+	logService  services.LogServiceInterface
+	userService services.UserServiceInterface
 }
-func NewRoutineHandler(service services.RoutineServiceInterface) *RoutineHandler {
-	return &RoutineHandler{service: service}
+func NewRoutineHandler(service services.RoutineServiceInterface, logService services.LogServiceInterface, userService services.UserServiceInterface) *RoutineHandler {
+	return &RoutineHandler{
+		service:     service,
+		logService:  logService,
+		userService: userService,
+	}
 }
 func (h *RoutineHandler) GetRoutineByID(c *gin.Context) {
 	userID, ok := c.Get("user_id")
@@ -64,6 +72,19 @@ func (h *RoutineHandler) CreateRoutine(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	if h.logService != nil {
+		userIDObj, _ := primitive.ObjectIDFromHex(userID.(string))
+		user, _ := h.userService.GetUserByID(userID.(string))
+		_ = h.logService.CreateLog(
+			models.LogLevelSuccess,
+			models.LogTypeRoutine,
+			"Rutina creada",
+			&userIDObj,
+			user.Name,
+			"Rutina: "+routine.Name,
+		)
+	}
 	c.JSON(http.StatusCreated, routine)
 }
 func (h *RoutineHandler) UpdateRoutine(c *gin.Context) {
@@ -91,6 +112,18 @@ func (h *RoutineHandler) UpdateRoutine(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	if h.logService != nil {
+		userIDObj, _ := primitive.ObjectIDFromHex(userID.(string))
+		user, _ := h.userService.GetUserByID(userID.(string))
+		_ = h.logService.CreateLog(
+			models.LogLevelInfo,
+			models.LogTypeRoutine,
+			"Rutina actualizada",
+			&userIDObj,
+			user.Name,
+			"Rutina: "+updated.Name,
+		)
+	}
 	c.JSON(http.StatusOK, updated)
 }
 func (h *RoutineHandler) DeleteRoutine(c *gin.Context) {
@@ -104,7 +137,20 @@ func (h *RoutineHandler) DeleteRoutine(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 		return
 	}
-	err := h.service.DeleteRoutine(userID.(string), id)
+	routine, err := h.service.GetRoutineByID(id)
+	if err == nil && h.logService != nil {
+		userIDObj, _ := primitive.ObjectIDFromHex(userID.(string))
+		user, _ := h.userService.GetUserByID(userID.(string))
+		_ = h.logService.CreateLog(
+			models.LogLevelWarning,
+			models.LogTypeRoutine,
+			"Rutina eliminada",
+			&userIDObj,
+			user.Name,
+			"Rutina: "+routine.Name,
+		)
+	}
+	err = h.service.DeleteRoutine(userID.(string), id)
 	if err != nil {
 		if err.Error() == "no autorizado: no es el owner de la rutina" {
 			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})

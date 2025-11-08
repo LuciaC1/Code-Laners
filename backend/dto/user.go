@@ -45,7 +45,7 @@ type LoginRequest struct {
 }
 type UpdateUserRequest struct {
 	Name   string   `json:"name,omitempty"`
-	Email  string   `json:"email,omitempty"`
+	Email  string   `json:"email,omitempty" binding:"omitempty,email"`
 	Weight float64  `json:"weight,omitempty"`
 	Height float64  `json:"height,omitempty"`
 	Level  string   `json:"level,omitempty"`

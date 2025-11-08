@@ -2,7 +2,7 @@ package dto
 type RoutineRequest struct {
 	UserID      string                 `json:"user_id"`
 	Name        string                 `json:"name" binding:"required"`
-	Excercises  []RoutineExcerciseList `json:"exercises" binding:"required"`
+	Excercises  []RoutineExcerciseList `json:"exercises" binding:"required,min=1,dive"`
 	Description string                 `json:"description,omitempty"`
 	IsPublic    bool                   `json:"is_public"`
 }
@@ -18,8 +18,8 @@ type RoutineResponse struct {
 type RoutineExcerciseList struct {
 	ExerciseID   string  `json:"exercise_id" binding:"required"`
 	ExerciseName string  `json:"exercise_name,omitempty"`
-	Order        int     `json:"order" binding:"required"`
-	Sets         int     `json:"sets" binding:"required"`
-	Reps         int     `json:"reps" binding:"required"`
+	Order        int     `json:"order" binding:"required,gt=0"`
+	Sets         int     `json:"sets" binding:"required,gt=0"`
+	Reps         int     `json:"reps" binding:"required,gt=0"`
 	Weight       float64 `json:"weight,omitempty"`
 }

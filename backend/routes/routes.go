@@ -3,12 +3,11 @@ package routes
 import (
 	"backend/handlers"
 	"backend/middleware"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandler *handlers.ExerciseHandler, routineHandler *handlers.RoutineHandler, workoutHandler *handlers.WorkoutHandler, statsHandler *handlers.StatsHandler) {
+func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandler *handlers.ExerciseHandler, routineHandler *handlers.RoutineHandler, workoutHandler *handlers.WorkoutHandler, statsHandler *handlers.StatsHandler, logHandler *handlers.LogHandler) {
 	r.GET("/", handlers.IndexPage)
 	r.GET("/login", handlers.LoginPage)
 	r.GET("/register", handlers.RegisterPage)
@@ -67,12 +66,8 @@ func SetupRoutes(r *gin.Engine, userHandler *handlers.UserHandler, exerciseHandl
 			adminAPI.GET("/users/:id", userHandler.GetUserByID)
 			adminAPI.GET("/users", userHandler.GetAllUsers)
 			adminAPI.PUT("/users/:id/role", userHandler.UpdateUserRole)
-			adminAPI.GET("/logs", func(c *gin.Context) {
-				c.JSON(http.StatusNotImplemented, gin.H{"error": "Handler not implemented yet", "logs": []interface{}{}})
-			})
-			adminAPI.DELETE("/logs", func(c *gin.Context) {
-				c.JSON(http.StatusNotImplemented, gin.H{"error": "Handler not implemented yet"})
-			})
+			adminAPI.GET("/logs", logHandler.GetLogs)
+			adminAPI.DELETE("/logs", logHandler.DeleteLogs)
 			adminAPI.GET("/stats", statsHandler.GetAdminStats)
 		}
 	}
