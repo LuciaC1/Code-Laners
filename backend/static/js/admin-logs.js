@@ -16,16 +16,24 @@ async function loadLogs() {
         const response = await fetch('/api/admin/logs', {
             headers: headers
         });
+        
         if (!response.ok) {
-            renderMockLogs();
+            const tbody = document.getElementById('logsTableBody');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar los logs</td></tr>';
+            }
             return;
         }
+        
         const data = await response.json();
         const logs = data.logs || [];
         renderLogs(logs);
     } catch (error) {
         console.error('Error loading logs:', error);
-        renderMockLogs();
+        const tbody = document.getElementById('logsTableBody');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar los logs</td></tr>';
+        }
     }
 }
 function renderLogs(logs) {
@@ -63,43 +71,6 @@ function renderLogs(logs) {
         `;
     }).join('');
 }
-function renderMockLogs() {
-    const mockLogs = [
-        {
-            timestamp: new Date().toISOString(),
-            level: 'success',
-            type: 'auth',
-            action: 'Usuario inició sesión',
-            user_name: 'Usuario',
-            details: 'Login exitoso'
-        },
-        {
-            timestamp: new Date(Date.now() - 3600000).toISOString(),
-            level: 'info',
-            type: 'exercise',
-            action: 'Ejercicio creado',
-            user_name: 'Admin',
-            details: 'Nuevo ejercicio agregado al catálogo'
-        },
-        {
-            timestamp: new Date(Date.now() - 7200000).toISOString(),
-            level: 'info',
-            type: 'routine',
-            action: 'Rutina creada',
-            user_name: 'Usuario',
-            details: 'Nueva rutina de entrenamiento'
-        },
-        {
-            timestamp: new Date(Date.now() - 10800000).toISOString(),
-            level: 'success',
-            type: 'workout',
-            action: 'Entrenamiento completado',
-            user_name: 'Usuario',
-            details: 'Entrenamiento registrado exitosamente'
-        }
-    ];
-    renderLogs(mockLogs);
-}
 function getLevelBadge(level) {
     const badges = {
         'info': '<span class="badge bg-info">Info</span>',
@@ -115,7 +86,8 @@ function getTypeBadge(type) {
         'exercise': '<span class="badge bg-success">Ejercicio</span>',
         'routine': '<span class="badge bg-info">Rutina</span>',
         'workout': '<span class="badge bg-warning text-dark">Entrenamiento</span>',
-        'auth': '<span class="badge bg-danger">Autenticación</span>'
+        'auth': '<span class="badge bg-danger">Autenticación</span>',
+        'general': '<span class="badge bg-secondary">General</span>'
     };
     return badges[type] || '<span class="badge bg-secondary">General</span>';
 }
@@ -130,9 +102,7 @@ function showLogDetails(log) {
     `;
     alert(`Detalles:\n${JSON.stringify(log, null, 2)}`);
 }
-function applyLogFilters() {
-    loadLogs();
-}
+
 async function clearLogs() {
     if (!confirm('¿Estás seguro de limpiar todos los logs? Esta acción no se puede deshacer.')) {
         return;
@@ -147,7 +117,8 @@ async function clearLogs() {
             alert('Logs limpiados correctamente');
             loadLogs();
         } else {
-            alert('Error al limpiar logs');
+            const errorData = await response.json().catch(() => ({}));
+            alert('Error al limpiar logs: ' + (errorData.error || 'Error desconocido'));
         }
     } catch (error) {
         console.error('Error clearing logs:', error);
